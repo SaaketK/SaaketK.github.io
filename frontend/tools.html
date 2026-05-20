@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tools – Saaket K</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <nav id="navbar">
+    <div class="nav-inner">
+      <a href="../index.html" class="nav-logo">SK</a>
+      <div class="nav-links">
+        <a href="projects.html">Projects</a>
+        <a href="tools.html" class="active">Tools</a>
+        <a href="books.html">Books</a>
+        <a href="top-secret.html">Top Secret</a>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <section id="tools">
+      <h2>Tools &amp; Utilities</h2>
+      <p class="section-subtitle">Small scripts/tools I built to solve everyday annoyances</p>
+
+      <span id="server-badge" class="server-badge checking">● Checking server…</span>
+
+      <div class="tool-grid">
+
+        <div class="tool-card">
+          <h3>HEIC → JPEG Converter</h3>
+          <p>Batch convert Apple HEIC photos to JPEG with full color profile accuracy.</p>
+          <div id="heic-panel" class="tool-panel">
+            <p class="tool-unavailable">Checking server…</p>
+          </div>
+        </div>
+
+        <div class="tool-card">
+          <h3>YT → MP3/MP4</h3>
+          <p>Download YouTube videos as MP3 audio or MP4 video.</p>
+          <div id="yt-panel" class="tool-panel">
+            <p class="tool-unavailable">Checking server…</p>
+          </div>
+        </div>
+
+        <div class="tool-card">
+          <h3>GDS Menu Scraper</h3>
+          <p>Today's dining menu from GDS.</p>
+          <div id="gds-panel" class="tool-panel">
+            <p class="tool-unavailable">Checking server…</p>
+          </div>
+        </div>
+
+        <div class="tool-card">
+          <h3>Clipboard → Download</h3>
+          <p>Paste an image from your clipboard and download it as a file.</p>
+          <div class="tool-panel">
+            <button id="clipboard-open-btn">Open paste box</button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- Clipboard modal -->
+  <div id="clipboard-modal" class="modal-overlay" hidden>
+    <div class="modal-box">
+      <button class="modal-close" id="clipboard-close-btn">&times;</button>
+      <div id="clipboard-paste-area" class="paste-area">
+        <p class="paste-hint">Press <kbd>Cmd+V</kbd> / <kbd>Ctrl+V</kbd> to paste</p>
+      </div>
+      <div id="clipboard-status" class="clipboard-status"></div>
+    </div>
+  </div>
+
+  <footer>
+    <p>&copy; 2026 Saaket K</p>
+  </footer>
+
+  <script src="config.js"></script>
+  <script src="tools.js"></script>
+</body>
+</html>

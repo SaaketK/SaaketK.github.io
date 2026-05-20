@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Books – Saaket K</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <nav id="navbar">
+    <div class="nav-inner">
+      <a href="../index.html" class="nav-logo">SK</a>
+      <div class="nav-links">
+        <a href="projects.html">Projects</a>
+        <a href="tools.html">Tools</a>
+        <a href="books.html" class="active">Books</a>
+        <a href="top-secret.html">Top Secret</a>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <section id="books">
+      <h2>Books</h2>
+      <p class="section-subtitle">
+        I'm interested in anything <strong>math, physics, engineering, philosophy, and psychology</strong>.
+      </p>
+
+      <div class="books-tabs">
+        <button class="tab-btn active" data-tab="currently-reading">Currently Reading</button>
+        <button class="tab-btn" data-tab="finished">Finished</button>
+        <button class="tab-btn" data-tab="recommend">Recommend a Book</button>
+      </div>
+
+      <div class="tab-panel active" id="currently-reading">
+        <div class="book-category">
+          <h3>Casual</h3>
+          <div id="current-casual-list" class="book-list"></div>
+        </div>
+        <div class="book-category">
+          <h3>Formal</h3>
+          <div id="current-formal-list" class="book-list"></div>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="finished">
+        <div class="book-category">
+          <h3>Casual</h3>
+          <div id="finished-casual-list" class="book-list"></div>
+        </div>
+        <div class="book-category">
+          <h3>Formal <span class="formal-note">(textbooks &amp; chapters)</span></h3>
+          <div id="finished-formal-list" class="book-list"></div>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="recommend">
+        <div class="recommend-box">
+          <p>Think I'd enjoy something? Let me know!</p>
+          <form id="recommend-form">
+            <input type="text" id="rec-title" placeholder="Book title" required>
+            <input type="text" id="rec-author" placeholder="Author (optional)">
+            <select id="rec-type">
+              <option value="casual">Casual read</option>
+              <option value="formal">Formal / textbook</option>
+            </select>
+            <textarea id="rec-note" placeholder="Why should I read this? (optional)" rows="3"></textarea>
+            <button type="submit">Send Recommendation</button>
+          <div id="rec-feedback" class="rec-feedback" hidden></div>
+          <div id="rec-list-section" hidden>
+            <h3>Recommendations from visitors</h3>
+            <div id="rec-list" class="book-list"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Saaket K</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
