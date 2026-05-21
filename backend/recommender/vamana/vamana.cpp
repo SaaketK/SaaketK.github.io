@@ -50,7 +50,7 @@ void VamanaIndex::init_random_graph(std::mt19937& rng){
         // partial Fisher-Yates shuffle to pick R neighbors != i
         std::vector<int> tmp = pool;
         int picks = 0;
-        for(int k = n - 1; k >= 0 && picks <= cfg_.R; k--){
+        for(int k = n - 1; k >= 0 && picks < cfg_.R; k--){
             std::uniform_int_distribution<int> ud(0, k);
             int j = ud(rng);
             std::swap(tmp[j], tmp[k]);
@@ -228,15 +228,15 @@ void VamanaIndex::build(std::vector<BookNode> books){
         }
 
         // Remove duplicates by id
-        std::sort(candidates.begin(), candidates.end(), [](const Candidate& a, const Candidate& b){ return a.second == b.second; });
-        candidates.erase(std::unique(candidates.begin(), candidates.end(), [](const Candidate & a, const Candidate& b){ return a.second == b.second; }));
+        std::sort(candidates.begin(), candidates.end(), [](const Candidate& a, const Candidate& b){ return a.second < b.second; });
+        candidates.erase(std::unique(candidates.begin(), candidates.end(), [](const Candidate& a, const Candidate& b){ return a.second == b.second; }), candidates.end());
 
         // Pruning
         prune(p, candidates);
         
         for(int q : adj_[p]){
             adj_[q].push_back(p);
-            if(static_cast<int>(adj_[p].size()) > cfg_.R) {
+            if(static_cast<int>(adj_[q].size()) > cfg_.R) {
                 // Build candidate list for q and prune again
                 std::vector<Candidate> q_cands;
                 q_cands.reserve(adj_[q].size());

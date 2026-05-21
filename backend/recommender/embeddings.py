@@ -29,6 +29,9 @@ def rank_books(query: str, books: list[dict], top_n: int = 20) -> list[dict]:
 def embed_single(text: str) -> list[float]:
     return model.encode([text])[0].tolist()
 
+def embed_batch(texts: list[str]) -> list[list[float]]:
+    return model.encode(texts).tolist()
+
 if __name__ == "__main__":
     fake_books = [
         {"title": "Chaos", "author_name": "James Gleick", "subject": ["mathematics", "science"]},

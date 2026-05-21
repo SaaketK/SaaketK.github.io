@@ -16,11 +16,11 @@ import os
 import struct 
 from pathlib import Path
 from typing import Any
-from recommender.embeddings import embed_single, build_book_text
+from recommender.embeddings import embed_single, embed_batch, build_book_text
 
 # Load Library
 
-_LIB_PATH = os.environ.get("VAMANA_LIB_PATH", str(Path(__file__).parent.parent / "vamana" / "libvamana.so"),)
+_LIB_PATH = os.environ.get("VAMANA_LIB_PATH", str(Path(__file__).parent / "vamana" / "libvamana.so"),)
 try:
     _lib = ctypes.CDLL(_LIB_PATH)
 except OSError:
@@ -30,14 +30,14 @@ def _lib_available() -> bool:
     return _lib is not None
 '''
 C API (must match vamana_binding.cpp)
-void* vamana_create(int R, int L, float alpha, int use_cosine)
-void vamana_build(void* idx, float* vecs, int n, int dim, char** keys, int* ids)
+void* vamana_create(int R, int L, float alpha, bool use_cosine)
+void vamana_build(void* idx, float* vecs, int n, int dim)
 int vamana_search(void* idx, float* query, int dim, int top_k, int* out_ids)
 void vamana_destroy(void* idx)
 '''
 if _lib_available():
     _lib.vamana_create.restype = ctypes.c_void_p
-    _lib.vamana_create.argtypes = [ctypes.c_int, ctypes.c_int, ctypes.c_float, ctypes.c_int]
+    _lib.vamana_create.argtypes = [ctypes.c_int, ctypes.c_int, ctypes.c_float, ctypes.c_bool]
 
     _lib.vamana_build.restype = None
     _lib.vamana_build.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_float), ctypes.c_int, ctypes.c_int]
@@ -95,10 +95,10 @@ def vamana_filter(candidates: list[dict[str, Any]], query: str, top_k: int = 200
     
     top_k = min(top_k, len(candidates))
 
-    # Embeddings
+    # Embeddings (batch encode for performance)
     query_vec = _embed_text(query)
     book_texts = [build_book_text(b) for b in candidates]
-    book_vecs = [_embed_text(t) for t in book_texts]
+    book_vecs = embed_batch(book_texts)
     dim = len(query_vec)
 
     # C Library Path
