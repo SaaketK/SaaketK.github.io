@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/vamana_test.dir/vamana_test.cpp.o CMakeFiles/vamana_test.dir/vamana.cpp.o -o vamana_test 

@@ -26,6 +26,9 @@ def rank_books(query: str, books: list[dict], top_n: int = 20) -> list[dict]:
     best_matches = np.argsort(similarities)[::-1][:top_n]
     return [books[i] for i in best_matches]
 
+def embed_single(text: str) -> list[float]:
+    return model.encode([text])[0].tolist()
+
 if __name__ == "__main__":
     fake_books = [
         {"title": "Chaos", "author_name": "James Gleick", "subject": ["mathematics", "science"]},

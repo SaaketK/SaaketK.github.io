@@ -11,11 +11,12 @@ from books.schemas import (
 from recommender.keywords import getkeywords
 from recommender.openlibrary import search_books
 from recommender.embeddings import rank_books
+from recommender.vamana_filter import vamana_filter
 
 router = APIRouter()
 
 
-# ── User's book list ──────────────────────────────────────────────────────────
+# User Book List
 
 @router.get("", response_model=list[BookOut])
 def list_books(
@@ -52,7 +53,7 @@ def update_book(book_id: int, body: BookUpdate, db: Session = Depends(get_db)):
     return book
 
 
-# ── Visitor recommendations ───────────────────────────────────────────────────
+# Visitor Recommendation
 
 @router.post("/recommendations", response_model=RecommendationOut, status_code=201)
 def submit_recommendation(body: RecommendationIn, db: Session = Depends(get_db)):
@@ -84,27 +85,14 @@ def list_recommendations(db: Session = Depends(get_db)):
         .all()
     )
 
-
-# ── AI recommender ────────────────────────────────────────────────────────────
-# Pipeline: query → Ollama keywords → OpenLibrary search → embeddings rerank
-#
-# TODO: once the Vamana C++ index is ready, swap in:
-#   candidates = search_books(keywords, limit=10_000)
-#   candidates = vamana_filter(candidates, query, top_k=200)
-#   ranked = rank_books(query, candidates, top_n=body.top_n)
-
-@router.post("/recommend", response_model=list[RecommendedBook])
+@router.get("/recommend", response_model=list[RecommendedBook])
 def recommend_books(body: RecommendRequest):
     keywords = getkeywords(body.query)
     if not keywords:
-        raise HTTPException(
-            status_code=503,
-            detail="Could not extract keywords — is Ollama running?",
-        )
-
-    candidates = search_books(keywords, limit=200)
+        raise HTTPException(status_code = 503, detail = "Failure to extract keywords")
+    candidates = search_books(keywords, limit=10_000)
     if not candidates:
-        raise HTTPException(status_code=404, detail="No books found for those keywords")
-
-    ranked = rank_books(body.query, candidates, top_n=body.top_n)
+        raise HTTPException(status_code = 404, detail = "No books found for given query")
+    candidates = vamana_filter(candidates, body.query, top_k = 200)
+    ranked = rank_books(body.query, candidates, top_n = body.top_n)
     return ranked
