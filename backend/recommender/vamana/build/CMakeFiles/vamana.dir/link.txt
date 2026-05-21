@@ -1,1 +1,0 @@
-/usr/bin/c++ -fPIC -shared -Wl,-soname,libvamana.so -o libvamana.so CMakeFiles/vamana.dir/vamana.cpp.o CMakeFiles/vamana.dir/vamana_binding.cpp.o 
