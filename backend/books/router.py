@@ -85,7 +85,7 @@ def list_recommendations(db: Session = Depends(get_db)):
         .all()
     )
 
-@router.get("/recommend", response_model=list[RecommendedBook])
+@router.post("/recommend", response_model=list[RecommendedBook])
 def recommend_books(body: RecommendRequest):
     keywords = getkeywords(body.query)
     if not keywords:
