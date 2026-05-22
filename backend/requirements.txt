@@ -1,0 +1,13 @@
+fastapi
+uvicorn[standard]
+yt-dlp
+cloudscraper
+pillow
+pillow-heif
+python-multipart
+pydantic
+sqlalchemy
+psycopg2-binary
+httpx
+sentence-transformers
+numpy

@@ -1,0 +1,6 @@
+*.env
+*.venv
+*__pycache__
+backend/recommender/vamana/build/
+backend/recommender/vamana/libvamana.so
+backend/recommender/vamana/build/libvamana.dylib

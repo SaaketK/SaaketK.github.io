@@ -1,0 +1,1 @@
+/usr/bin/c++  -arch arm64 -dynamiclib -Wl,-headerpad_max_install_names -o libvamana.dylib -install_name @rpath/libvamana.dylib CMakeFiles/vamana.dir/vamana.cpp.o CMakeFiles/vamana.dir/vamana_binding.cpp.o
