@@ -1,3 +1,3 @@
-// Set to cloudflare tunnel url
-// During local dev you set it to "http://localhost:8000"
-const API_BASE = "https://grande-temp-ready-univ.trycloudflare.com";
+const API_BASE = (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+  ? "http://localhost:8000"
+  : "https://grande-temp-ready-univ.trycloudflare.com";

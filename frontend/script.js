@@ -1,69 +1,59 @@
 // ============================================================
-// BOOK DATA
-// When your server is ready, replace the BookStore methods
-// with fetch() calls to your API endpoints.
+// BOOK DATA — fetched from API
 // ============================================================
 
-const BOOKS = {
-  currentlyReading: {
-    casual: [
-      { title: "The Denial of Death", author: "Ernest Becker"},
-      { title: "Inferno", author: "Dante Alighieri" },
-    ],
-    formal: [
-      { title: "Partial Differential Equations: An Introduction", author: "Walter A. Strauss" },
-    ],
-  },
-  finished: {
-    casual: [
-      // rating: null means "not yet rated", thoughts: null means "no thoughts yet"
-      { title: "The Human Stain", author: "Philip Roth", rating: null, thoughts: null },
-      { title: "Chaos", author: "James Gleick", rating: null, thoughts: null },
-      { title: "Atomic Habits", author: "James Clear", rating: null, thoughts: null },
-      { title: "Crime and Punishment", author: "Fyodor Dostoevsky", rating: null, thoughts: null },
-      { title: "48 Laws of Power", author: "Robert Greene", rating: null, thoughts: null },
-      { title: "How to Be a Stoic", author: "Massimo Pigliucci", rating: null, thoughts: null },
-      { title: "The Fractal Geometry of Nature", author: "Benoit B. Mandelbrot", rating: null, thoughts: null },
-      { title: "Notes from Underground", author: "Fyodor Dostoevsky", rating: null, thoughts: null },
-      { title: "The Idiot", author: "Fyodor Dostoevsky", rating: null, thoughts: null },
-    ],
-    formal: [
-      { title: "The Information", author: "James Gleick", note: "select chapters", rating: null, thoughts: null },
-      { title: "Computer Architecture: A Quantitative Approach", author: "Hennessy & Patterson", note: "select chapters", rating: null, thoughts: null },
-    ],
-  },
-};
+let BOOKS = { currentlyReading: { casual: [], formal: [] }, finished: { casual: [], formal: [] } };
+let _recommendations = [];
 
-// ============================================================
-// BACKEND ABSTRACTION (swap to real API later)
-// ============================================================
+async function fetchBooks() {
+  try {
+    const res = await fetch(`${API_BASE}/books`);
+    const books = await res.json();
+    BOOKS = { currentlyReading: { casual: [], formal: [] }, finished: { casual: [], formal: [] } };
+    books.forEach((b) => {
+      const group = b.status === "reading" ? "currentlyReading" : "finished";
+      if (BOOKS[group]?.[b.type]) BOOKS[group][b.type].push(b);
+    });
+  } catch (err) {
+    console.error("Could not load books:", err);
+  }
+}
 
-const BookStore = {
-  // --- Future: replace with fetch(`/api/recommendations`, ...) ---
+async function fetchRecommendations() {
+  try {
+    const res = await fetch(`${API_BASE}/books/recommendations`);
+    const data = await res.json();
+    _recommendations = data.map((r) => ({
+      title: r.book.title,
+      author: r.book.author,
+      type: r.book.type,
+      note: r.comment,
+      date: r.submitted_at,
+    }));
+  } catch (err) {
+    console.error("Could not load recommendations:", err);
+  }
+}
 
-  getRecommendations() {
-    const raw = localStorage.getItem("book-recommendations");
-    return raw ? JSON.parse(raw) : [];
-  },
+async function postRecommendation(rec) {
+  const res = await fetch(`${API_BASE}/books/recommendations`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ title: rec.title, author: rec.author, type: rec.type, note: rec.note }),
+  });
+  if (!res.ok) throw new Error(await res.text());
+}
 
-  addRecommendation(rec) {
-    const recs = this.getRecommendations();
-    recs.push({ ...rec, date: new Date().toISOString() });
-    localStorage.setItem("book-recommendations", JSON.stringify(recs));
-    return recs;
-  },
-
-  getAllKnownTitles() {
-    const titles = [];
-    const addFrom = (list) => list.forEach((b) => titles.push(b.title.toLowerCase()));
-    addFrom(BOOKS.currentlyReading.casual);
-    addFrom(BOOKS.currentlyReading.formal);
-    addFrom(BOOKS.finished.casual);
-    addFrom(BOOKS.finished.formal);
-    this.getRecommendations().forEach((r) => titles.push(r.title.toLowerCase()));
-    return titles;
-  },
-};
+function getAllKnownTitles() {
+  const titles = [];
+  const addFrom = (list) => list.forEach((b) => titles.push(b.title.toLowerCase()));
+  addFrom(BOOKS.currentlyReading.casual);
+  addFrom(BOOKS.currentlyReading.formal);
+  addFrom(BOOKS.finished.casual);
+  addFrom(BOOKS.finished.formal);
+  _recommendations.forEach((r) => titles.push(r.title.toLowerCase()));
+  return titles;
+}
 
 // ============================================================
 // RENDERING
@@ -141,7 +131,7 @@ function renderBooks() {
 }
 
 function renderRecommendations() {
-  const recs = BookStore.getRecommendations();
+  const recs = _recommendations;
   const section = document.getElementById("rec-list-section");
   const list = document.getElementById("rec-list");
 
@@ -179,7 +169,7 @@ document.querySelectorAll(".tab-btn").forEach((btn) => {
 // RECOMMENDATION FORM
 // ============================================================
 
-document.getElementById("recommend-form").addEventListener("submit", (e) => {
+document.getElementById("recommend-form").addEventListener("submit", async (e) => {
   e.preventDefault();
   const feedback = document.getElementById("rec-feedback");
   const title = document.getElementById("rec-title").value.trim();
@@ -189,26 +179,37 @@ document.getElementById("recommend-form").addEventListener("submit", (e) => {
 
   if (!title) return;
 
-  const known = BookStore.getAllKnownTitles();
-  if (known.includes(title.toLowerCase())) {
+  if (getAllKnownTitles().includes(title.toLowerCase())) {
     feedback.textContent = `"${title}" is already on my list — either I've read it, I'm reading it, or someone already recommended it. Thanks though!`;
     feedback.className = "rec-feedback warning";
     feedback.hidden = false;
     return;
   }
 
-  BookStore.addRecommendation({ title, author, type, note });
-  feedback.textContent = `Thanks for recommending "${title}"! I'll check it out.`;
-  feedback.className = "rec-feedback success";
-  feedback.hidden = false;
-
-  e.target.reset();
-  renderRecommendations();
+  try {
+    await postRecommendation({ title, author, type, note });
+    await fetchRecommendations();
+    feedback.textContent = `Thanks for recommending "${title}"! I'll check it out.`;
+    feedback.className = "rec-feedback success";
+    feedback.hidden = false;
+    e.target.reset();
+    renderRecommendations();
+  } catch (err) {
+    feedback.textContent = "Something went wrong — please try again later.";
+    feedback.className = "rec-feedback warning";
+    feedback.hidden = false;
+  }
 });
 
 // ============================================================
 // INIT
 // ============================================================
 
-renderBooks();
-renderRecommendations();
+async function init() {
+  await fetchBooks();
+  await fetchRecommendations();
+  renderBooks();
+  renderRecommendations();
+}
+
+init();
