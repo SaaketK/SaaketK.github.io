@@ -42,6 +42,16 @@ CS major at NJIT.
 double minor in computer engineering &
 computational mathematics.
 
+current work:
+  researching ANNS algorithm performance
+  on Intel AMX CPUs and high-performance
+  GPU clusters. (summer 2026)
+
+past work:
+  software engineering intern at Cardaverse.
+  web development frameworks & full-stack
+  engineering.
+
 interests:
   - computer architecture
   - systems programming
@@ -49,13 +59,22 @@ interests:
   - quantum computing
   - optimization algorithms
 
-[TODO: add more about myself — current work,
-past experience, hobbies outside CS]
+hobbies:
+  - learning piano
+  - reading books
+  - casual basketball
 
 reach me:
   github   ->  github.com/SaaketK
   linkedin ->  linkedin.com/in/saaket-kulkarni
-  email    ->  [TODO]`
+  email    ->  saaket.bgk@gmail.com`
+  },
+  "Applications/": {
+    type: "dir",
+    children: {
+      "Tools": { type: "app", app: "tools" },
+      "Books": { type: "app", app: "books" },
+    }
   },
   "projects/": {
     type: "dir",
@@ -68,34 +87,33 @@ reach me:
             content:
 `# book recommender
 
-a personalized book recommendation engine.
-in progress — backend running on my desktop.
+a personalized book recommendation engine
+integrated into this site.
 
 stack:
   python (FastAPI)
   postgresql
   ollama (mistral 7B)
   sentence-transformers
-  c++ vamana index (summer 2026)
+  c++ vamana index
 
 pipeline:
   user input
     -> ollama (keyword extraction)
   openlibrary api
-    -> ~200 candidates
-  embedding similarity
-    -> top 20
-  ollama (final ranking)
-    -> top 3 with reasoning
+    -> ~10,000 candidates
+  c++ vamana ann index
+    -> top 200
+  embedding similarity rerank
+    -> top N
 
-systems work (in progress):
+systems work:
   custom vamana ann graph in c++
   pybind11 bridge to python
-  AVX2 SIMD distance kernels (stretch goal)
+  batch embedding for performance
 
 repo: not yet public — will live at
-github.com/SaaketK/book-recommender
-when the python pipeline is shippable.`
+github.com/SaaketK/book-recommender`
           },
           "pipeline.txt": {
             type: "file",
@@ -103,13 +121,11 @@ when the python pipeline is shippable.`
 `# pipeline status
 
 [done] keywords.py     — LLM keyword extraction
-[done] openlibrary.py  — API search (200 candidates)
-[done] embeddings.py   — cosine similarity, top 20
-[wip ] ranker.py       — LLM picks top 3
-[wip ] pipeline.py     — wire everything together
-[todo] FastAPI route   — expose to frontend
-[todo] vamana C++      — summer 2026
-[todo] SIMD kernels    — stretch`
+[done] openlibrary.py  — API search (10k candidates)
+[done] embeddings.py   — cosine similarity rerank
+[done] vamana C++      — ANN index, top 200 filter
+[done] FastAPI route   — POST /books/recommend
+[wip ] vamana dylib    — needs Mac recompile`
           }
         }
       },
@@ -216,26 +232,42 @@ double-click \`github\` to open it.`
             content:
 `# snaphealth
 
-[TODO: fill in description — couldn't find
-this on the public github profile. add the
-real readme content here once you point me
-at the repo, or paste the description below.]
+Anthropic Claude Builder Club Hackathon
+Spring 2026.
 
-what it does:
-  [TODO]
+developers: Roshan Tailor, Saaket Kulkarni,
+            Frederick Rajakumar
 
-stack:
-  [TODO]
+an AI-powered health literacy and triage
+tool for people without easy access to
+medical guidance.
 
-what i learned / what was hard:
-  [TODO]
+the problem:
+  healthcare literacy is one of the most
+  unevenly distributed resources in the
+  world. whether you're uninsured, dealing
+  with a language barrier, or unable to get
+  a timely appointment, understanding what's
+  happening to yourself is a privilege many
+  don't have.
 
-repo: [TODO: paste url, then i'll wire
-the github link]`
+the solution:
+  users can describe symptoms in plain text,
+  upload a photo of a wound or skin condition,
+  or point their camera at a medication label
+  and receive a clear, structured assessment
+  in plain english. it doesn't replace a
+  doctor — it helps people understand what
+  they're looking at well enough to take
+  the right next step.
+
+live: snaphealth.vercel.app
+repo: github.com/RTailor2301/SnapHealth
+double-click \`github\` to open it.`
           },
           "github": {
             type: "link",
-            url: "https://github.com/SaaketK"
+            url: "https://github.com/RTailor2301/SnapHealth"
           }
         }
       },
@@ -267,12 +299,6 @@ to draw from:]
   lab lock         — fine-grained locking
   lab fs           — large files + symlinks
   lab mmap         — memory-mapped files
-
-what i'm getting out of it:
-  [TODO: write a few honest lines on what
-  you're learning — kernel boot path,
-  trap handling, page tables, fs internals,
-  whatever's clicking for you]
 
 repo: private. ask me directly if you want
 to see the work.`
@@ -412,9 +438,8 @@ think i'd enjoy something? send it my way.
 i'm into math, physics, engineering, philosophy,
 and psychology — but i'm open to anything good.
 
-[TODO: wire this up to the recommender backend
-once it's deployed — for now, drop me an email
-or DM on linkedin]`
+→ open Applications/Books to send a recommendation
+  (or to try the AI recommender for yourself)`
       }
     }
   },
@@ -555,6 +580,60 @@ function MeGlyph({ size = 48 }) {
   );
 }
 
+function AppsGlyph({ size = 48 }) {
+  return (
+    <svg width={size} height={size * 0.83} viewBox="0 0 48 40" shapeRendering="crispEdges">
+      <rect x="2" y="2" width="44" height="36" fill="#3a4a5a" />
+      <rect x="2" y="2" width="44" height="36" fill="none" stroke="#1a2028" strokeWidth="1" />
+      <rect x="8" y="8" width="8" height="8" fill="#5cf08a" />
+      <rect x="20" y="8" width="8" height="8" fill="#f0a85c" />
+      <rect x="32" y="8" width="8" height="8" fill="#5c8af0" />
+      <rect x="8" y="22" width="8" height="8" fill="#f05c8a" />
+      <rect x="20" y="22" width="8" height="8" fill="#e8e070" />
+      <rect x="32" y="22" width="8" height="8" fill="#a85cf0" />
+    </svg>
+  );
+}
+
+function ToolsAppGlyph({ size = 48 }) {
+  return (
+    <svg width={size} height={size * 0.83} viewBox="0 0 48 40" shapeRendering="crispEdges">
+      <rect x="2" y="2" width="44" height="36" fill="#6b7a8a" />
+      <rect x="2" y="2" width="44" height="36" fill="none" stroke="#2a3038" strokeWidth="1" />
+      {/* wrench */}
+      <rect x="10" y="8" width="4" height="22" fill="#d0d8e0" />
+      <rect x="8" y="6" width="8" height="4" fill="#d0d8e0" />
+      <rect x="8" y="28" width="8" height="4" fill="#d0d8e0" />
+      {/* screwdriver */}
+      <rect x="22" y="6" width="4" height="18" fill="#e8d870" />
+      <rect x="20" y="22" width="8" height="6" fill="#a83a3a" />
+      {/* hammer */}
+      <rect x="34" y="10" width="8" height="6" fill="#888" />
+      <rect x="36" y="16" width="4" height="16" fill="#6b4a30" />
+    </svg>
+  );
+}
+
+function BooksAppGlyph({ size = 48 }) {
+  return (
+    <svg width={size} height={size * 0.83} viewBox="0 0 48 40" shapeRendering="crispEdges">
+      <rect x="2" y="2" width="44" height="36" fill="#3a2a1a" />
+      <rect x="2" y="2" width="44" height="36" fill="none" stroke="#1a0f08" strokeWidth="1" />
+      {/* book spines */}
+      <rect x="8" y="6" width="6" height="26" fill="#a83a3a" />
+      <rect x="8" y="8" width="6" height="2" fill="#d85858" />
+      <rect x="16" y="4" width="6" height="28" fill="#3a6a3a" />
+      <rect x="16" y="6" width="6" height="2" fill="#5a8a5a" />
+      <rect x="24" y="8" width="6" height="24" fill="#3a4a8a" />
+      <rect x="24" y="10" width="6" height="2" fill="#5a6aaa" />
+      <rect x="32" y="6" width="6" height="26" fill="#c8a040" />
+      <rect x="32" y="8" width="6" height="2" fill="#e8c060" />
+      {/* shelf */}
+      <rect x="4" y="32" width="40" height="2" fill="#1a0f08" />
+    </svg>
+  );
+}
+
 // ============================================================
 // linkifyContent — turn URLs in plain text into clickable <a> tags.
 // Catches: full URLs (http/https) and bare domains under common TLDs
@@ -666,8 +745,10 @@ function Desktop({ onClose }) {
   const [openFolder, setOpenFolder] = useState(null);
   const [selectedIcon, setSelectedIcon] = useState(null);
   const [viewers, setViewers] = useState([]); // [{ id, name, content }]
-  const [windowOrder, setWindowOrder] = useState([]); // stacking: 'folder' or viewer id, last = top
+  const [apps, setApps] = useState([]); // [{ id, app }]
+  const [windowOrder, setWindowOrder] = useState([]); // stacking: 'folder' | viewer id | `app-${id}`
   const viewerIdRef = useRef(0);
+  const appIdRef = useRef(0);
   const focusWindow = (id) => setWindowOrder((o) => (o[o.length - 1] === id ? o : [...o.filter((x) => x !== id), id]));
   const openViewer = (name, content) => {
     const id = ++viewerIdRef.current;
@@ -677,6 +758,17 @@ function Desktop({ onClose }) {
   const closeViewer = (id) => {
     setViewers((v) => v.filter((w) => w.id !== id));
     setWindowOrder((o) => o.filter((x) => x !== id));
+  };
+  const openApp = (appName) => {
+    const id = ++appIdRef.current;
+    const key = `app-${id}`;
+    setApps((a) => [...a, { id, app: appName }]);
+    setWindowOrder((o) => [...o.filter((x) => x !== key), key]);
+  };
+  const closeApp = (id) => {
+    const key = `app-${id}`;
+    setApps((a) => a.filter((w) => w.id !== id));
+    setWindowOrder((o) => o.filter((x) => x !== key));
   };
   const termRef = useRef(null);
 
@@ -700,16 +792,16 @@ function Desktop({ onClose }) {
   const clockText = `${hh}:${mm} ${ampm}`;
 
   const rootIcons = [
-    { name: "about_me",    kind: "file", glyph: <MeGlyph /> },
-    { name: "projects/",   kind: "dir",  glyph: <FolderGlyph /> },
-    { name: "tools/",      kind: "dir",  glyph: <FolderGlyph /> },
-    { name: "books/",      kind: "dir",  glyph: <FolderGlyph /> },
-    { name: "top_secret/", kind: "dir",  glyph: <FolderGlyph /> },
-    { name: "README.txt",  kind: "file", glyph: <FileGlyph /> },
-    { name: "Terminal",    kind: "app",  glyph: <TerminalGlyph /> },
+    { name: "about_me",       kind: "file", glyph: <MeGlyph /> },
+    { name: "Applications/",  kind: "dir",  glyph: <AppsGlyph /> },
+    { name: "projects/",      kind: "dir",  glyph: <FolderGlyph /> },
+    { name: "tools/",         kind: "dir",  glyph: <FolderGlyph /> },
+    { name: "books/",         kind: "dir",  glyph: <FolderGlyph /> },
+    { name: "top_secret/",    kind: "dir",  glyph: <FolderGlyph /> },
+    { name: "README.txt",     kind: "file", glyph: <FileGlyph /> },
+    { name: "Terminal",       kind: "term", glyph: <TerminalGlyph /> },
   ];
 
-  // FIXED: files open FileViewer, never feed terminal
   const openIcon = (icon) => {
     if (icon.kind === "dir") {
       setOpenFolder([icon.name]);
@@ -719,7 +811,7 @@ function Desktop({ onClose }) {
       if (!node) return;
       if (node.type === "link") window.open(node.url, "_blank", "noopener,noreferrer");
       else openViewer(icon.name, node.content);
-    } else if (icon.kind === "app") {
+    } else if (icon.kind === "term") {
       termRef.current?.focus();
     }
   };
@@ -791,6 +883,21 @@ function Desktop({ onClose }) {
         />
       ))}
 
+      {/* Apps (Tools / Books) */}
+      {apps.map((a, i) => {
+        const key = `app-${a.id}`;
+        const z = 200 + windowOrder.indexOf(key);
+        if (a.app === "tools") {
+          return <ToolsApp key={a.id} offsetIndex={i} zIndex={z}
+            onFocus={() => focusWindow(key)} onClose={() => closeApp(a.id)} />;
+        }
+        if (a.app === "books") {
+          return <BooksApp key={a.id} offsetIndex={i} zIndex={z}
+            onFocus={() => focusWindow(key)} onClose={() => closeApp(a.id)} />;
+        }
+        return null;
+      })}
+
       {openFolder && (
         <FileWindow
           path={openFolder}
@@ -798,10 +905,10 @@ function Desktop({ onClose }) {
           onFocus={() => focusWindow('folder')}
           onClose={() => { setOpenFolder(null); setWindowOrder((o) => o.filter((x) => x !== 'folder')); }}
           onOpenFile={(p, name) => {
-            // FIXED: open FileViewer, not terminal cat command
             const node = getNode([...p.map(s => s.replace(/\/$/, "")), name]);
             if (!node) return;
             if (node.type === "link") window.open(node.url, "_blank", "noopener,noreferrer");
+            else if (node.type === "app") openApp(node.app);
             else openViewer(name, node.content);
           }}
           onOpenDir={(p) => {
@@ -851,6 +958,8 @@ function FileWindow({ path, onClose, onOpenFile, onOpenDir, zIndex = 200, onFocu
           const stripped = name.replace(/\/$/, "");
           const child = !isDir ? getNode([...path.map(s => s.replace(/\/$/, "")), name]) : null;
           const isLink = child && child.type === "link";
+          const isApp = child && child.type === "app";
+          const appGlyph = isApp ? (child.app === "tools" ? <ToolsAppGlyph size={44} /> : <BooksAppGlyph size={44} />) : null;
           return (
             <div
               key={name}
@@ -860,7 +969,12 @@ function FileWindow({ path, onClose, onOpenFile, onOpenDir, zIndex = 200, onFocu
                 else onOpenFile(path, name);
               }}
             >
-              <span className="glyph">{isDir ? <FolderGlyph size={44} /> : isLink ? <GithubGlyph size={44} /> : <FileGlyph size={44} />}</span>
+              <span className="glyph">
+                {isDir ? <FolderGlyph size={44} />
+                  : isApp ? appGlyph
+                  : isLink ? <GithubGlyph size={44} />
+                  : <FileGlyph size={44} />}
+              </span>
               <span className="label">{stripped}</span>
             </div>
           );
@@ -1052,5 +1166,455 @@ const TerminalPanel = React.forwardRef(function TerminalPanel({ onClose }, ref) 
     </div>
   );
 });
+
+// ============================================================
+// AppWindow — generic retro app window (drag + resize)
+// ============================================================
+function AppWindow({ title, icon, children, onClose, onFocus, offsetIndex = 0, zIndex = 200, initialSize = { width: 580, height: 540 } }) {
+  const initLeft = typeof window !== 'undefined' ? Math.max(40, Math.round(window.innerWidth / 2 - initialSize.width / 2)) : 200;
+  const [pos, onHeaderMouseDown] = useDraggable({ top: 40 + offsetIndex * 28, left: initLeft + offsetIndex * 28 });
+  const [size, setSize] = useState(initialSize);
+  const startResize = (e) => {
+    if (e.button !== 0) return;
+    e.preventDefault(); e.stopPropagation();
+    const sx = e.clientX, sy = e.clientY, sw = size.width, sh = size.height;
+    const mv = (ev) => setSize({ width: Math.max(360, sw + (ev.clientX - sx)), height: Math.max(280, sh + (ev.clientY - sy)) });
+    const up = () => { window.removeEventListener('mousemove', mv); window.removeEventListener('mouseup', up); };
+    window.addEventListener('mousemove', mv); window.addEventListener('mouseup', up);
+  };
+  return (
+    <div
+      className="app-window"
+      onMouseDown={onFocus}
+      style={{ position: "absolute", top: pos.top, left: pos.left, width: size.width, height: size.height, zIndex }}
+    >
+      <div className="app-titlebar" onMouseDown={onHeaderMouseDown}>
+        <span className="app-titlebar-icon">{icon}</span>
+        <span className="app-titlebar-name">{title}</span>
+        <button className="app-titlebar-x" onClick={onClose}>✕</button>
+      </div>
+      <div className="app-body">{children}</div>
+      <div className="app-footer">
+        <span>{title.toLowerCase()} · v0.1</span>
+        <span onMouseDown={startResize} title="Drag to resize" className="app-resize-grip"></span>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
+// useServerStatus — pings /health, polls every 30s
+// ============================================================
+function useServerStatus() {
+  const [status, setStatus] = useState("checking"); // checking | online | offline
+  useEffect(() => {
+    let cancelled = false;
+    const ping = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/health`, { signal: AbortSignal.timeout(4000) });
+        if (!cancelled) setStatus(res.ok ? "online" : "offline");
+      } catch {
+        if (!cancelled) setStatus("offline");
+      }
+    };
+    ping();
+    const id = setInterval(ping, 30000);
+    return () => { cancelled = true; clearInterval(id); };
+  }, []);
+  return status;
+}
+
+function ServerBadge({ status }) {
+  const label = status === "checking" ? "checking…" : status === "online" ? "server online" : "server offline";
+  return <div className={`server-badge ${status}`}>● {label}</div>;
+}
+
+// ============================================================
+// ToolsApp — interactive interface for backend tools
+// ============================================================
+function ToolsApp(props) {
+  const status = useServerStatus();
+  const offline = status === "offline";
+  return (
+    <AppWindow title="Tools" icon={<ToolsAppGlyph size={20} />} {...props} initialSize={{ width: 620, height: 600 }}>
+      <ServerBadge status={status} />
+      {offline
+        ? <div className="tool-offline">Server is offline — these tools need the backend running.</div>
+        : (
+          <>
+            <HeicTool />
+            <YtTool />
+            <GdsTool />
+            <ClipboardTool />
+          </>
+        )}
+    </AppWindow>
+  );
+}
+
+function HeicTool() {
+  const [files, setFiles] = useState([]);
+  const [statusMsg, setStatusMsg] = useState("");
+  const submit = async (e) => {
+    e.preventDefault();
+    if (!files.length) return;
+    setStatusMsg("Converting…");
+    const fd = new FormData();
+    for (const f of files) fd.append("files", f);
+    try {
+      const res = await fetch(`${API_BASE}/heic/convert`, { method: "POST", body: fd });
+      if (!res.ok) { const err = await res.json(); setStatusMsg(`Error: ${err.detail}`); return; }
+      const blob = await res.blob();
+      const isZip = files.length > 1;
+      const name = isZip ? "converted.zip" : `${files[0].name.replace(/\.heic$/i, "")}.jpg`;
+      const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name; a.click();
+      setStatusMsg(`Done — ${files.length} file(s) converted.`);
+    } catch { setStatusMsg("Request failed — is the server still running?"); }
+  };
+  return (
+    <section className="tool-section">
+      <h4>HEIC → JPEG</h4>
+      <form onSubmit={submit}>
+        <label className="file-input-label">
+          <input type="file" accept=".heic,.HEIC,.heif,.HEIF" multiple onChange={(e) => setFiles([...e.target.files])} />
+          <span>{files.length === 0 ? "Choose HEIC file(s)…" : files.length === 1 ? files[0].name : `${files.length} files selected`}</span>
+        </label>
+        <button type="submit" className="tool-btn">Convert to JPEG</button>
+      </form>
+      {statusMsg && <div className="tool-status">{statusMsg}</div>}
+    </section>
+  );
+}
+
+function YtTool() {
+  const [url, setUrl] = useState("");
+  const [fmt, setFmt] = useState("mp3");
+  const [statusMsg, setStatusMsg] = useState("");
+  const submit = async (e) => {
+    e.preventDefault();
+    if (!url.trim()) return;
+    setStatusMsg("Downloading…");
+    try {
+      const res = await fetch(`${API_BASE}/yt/download`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: url.trim(), format: fmt }),
+      });
+      if (!res.ok) { const err = await res.json(); setStatusMsg(`Error: ${err.detail}`); return; }
+      const blob = await res.blob();
+      const name = res.headers.get("content-disposition")?.match(/filename="?([^"]+)"?/)?.[1] ?? `download.${fmt}`;
+      const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name; a.click();
+      setStatusMsg("Done!");
+    } catch { setStatusMsg("Request failed — is the server still running?"); }
+  };
+  return (
+    <section className="tool-section">
+      <h4>YouTube → MP3 / MP4</h4>
+      <form onSubmit={submit}>
+        <input type="url" placeholder="https://youtube.com/watch?v=…" value={url} onChange={(e) => setUrl(e.target.value)} required />
+        <div className="tool-radio">
+          <label><input type="radio" name="ytfmt" value="mp3" checked={fmt === "mp3"} onChange={() => setFmt("mp3")} /> MP3</label>
+          <label><input type="radio" name="ytfmt" value="mp4" checked={fmt === "mp4"} onChange={() => setFmt("mp4")} /> MP4</label>
+        </div>
+        <button type="submit" className="tool-btn">Download</button>
+      </form>
+      {statusMsg && <div className="tool-status">{statusMsg}</div>}
+    </section>
+  );
+}
+
+function GdsTool() {
+  const [date, setDate] = useState("today");
+  const [meal, setMeal] = useState("lunch");
+  const [statusMsg, setStatusMsg] = useState("");
+  const [result, setResult] = useState(null);
+  const submit = async (e) => {
+    e.preventDefault();
+    setStatusMsg("Fetching menu…"); setResult(null);
+    try {
+      const res = await fetch(`${API_BASE}/gds/menu?date=${date}&meal=${meal}`);
+      const data = await res.json();
+      if (!res.ok) { setStatusMsg(`Error: ${data.detail}`); return; }
+      if (!data.menu?.length) { setStatusMsg("No menu items found for that meal."); return; }
+      setStatusMsg(""); setResult(data.menu);
+    } catch { setStatusMsg("Request failed — is the server still running?"); }
+  };
+  return (
+    <section className="tool-section">
+      <h4>GDS Menu Scraper</h4>
+      <form onSubmit={submit}>
+        <div className="tool-radio">
+          <label><input type="radio" name="gdsdate" value="today" checked={date === "today"} onChange={() => setDate("today")} /> Today</label>
+          <label><input type="radio" name="gdsdate" value="tomorrow" checked={date === "tomorrow"} onChange={() => setDate("tomorrow")} /> Tomorrow</label>
+        </div>
+        <select value={meal} onChange={(e) => setMeal(e.target.value)}>
+          <option value="breakfast">Breakfast</option>
+          <option value="lunch">Lunch</option>
+          <option value="dinner">Dinner</option>
+        </select>
+        <button type="submit" className="tool-btn">Get Menu</button>
+      </form>
+      {statusMsg && <div className="tool-status">{statusMsg}</div>}
+      {result && (
+        <div className="gds-result">
+          {result.map((cat) => (
+            <div key={cat.category} className="gds-station">
+              <h5>{cat.category}</h5>
+              <ul>{cat.items.map((i) => <li key={i}>{i}</li>)}</ul>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
+function ClipboardTool() {
+  const [statusMsg, setStatusMsg] = useState("Press Cmd+V / Ctrl+V to paste an image");
+  const [preview, setPreview] = useState(null);
+  const onPaste = async (e) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    let img = null;
+    for (const it of items) if (it.type.startsWith("image/")) { img = it; break; }
+    if (!img) { setStatusMsg("No image found in clipboard — copy an image first."); return; }
+    const blob = img.getAsFile();
+    setPreview(URL.createObjectURL(blob));
+    setStatusMsg("Uploading…");
+    const fd = new FormData();
+    fd.append("file", blob, `clipboard.${img.type.split("/")[1]}`);
+    try {
+      const res = await fetch(`${API_BASE}/clipboard/upload`, { method: "POST", body: fd });
+      if (!res.ok) { const err = await res.json(); setStatusMsg(`Error: ${err.detail}`); return; }
+      const dl = await res.blob();
+      const name = res.headers.get("content-disposition")?.match(/filename="?([^"]+)"?/)?.[1] ?? "clipboard.png";
+      const a = document.createElement("a"); a.href = URL.createObjectURL(dl); a.download = name; a.click();
+      setStatusMsg(`Downloaded as ${name}`);
+    } catch { setStatusMsg("Request failed — is the server running?"); }
+  };
+  return (
+    <section className="tool-section">
+      <h4>Clipboard → Download</h4>
+      <div className="clipboard-pastearea" tabIndex={0} onPaste={onPaste}>
+        {preview ? <img src={preview} alt="paste preview" /> : <span>click here, then paste</span>}
+      </div>
+      <div className="tool-status">{statusMsg}</div>
+    </section>
+  );
+}
+
+// ============================================================
+// BooksApp — currently reading / finished / recommend / AI recommender
+// ============================================================
+function BooksApp(props) {
+  const status = useServerStatus();
+  const [tab, setTab] = useState("reading");
+  const [books, setBooks] = useState([]);
+  const [recs, setRecs] = useState([]);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    if (status !== "online") return;
+    const load = async () => {
+      try {
+        const [bRes, rRes] = await Promise.all([
+          fetch(`${API_BASE}/books`),
+          fetch(`${API_BASE}/books/recommendations`),
+        ]);
+        if (bRes.ok) setBooks(await bRes.json());
+        if (rRes.ok) setRecs(await rRes.json());
+      } catch { /* no-op */ }
+      setLoaded(true);
+    };
+    load();
+  }, [status]);
+
+  const refreshRecs = async () => {
+    try { const r = await fetch(`${API_BASE}/books/recommendations`); if (r.ok) setRecs(await r.json()); }
+    catch {}
+  };
+
+  return (
+    <AppWindow title="Books" icon={<BooksAppGlyph size={20} />} {...props} initialSize={{ width: 620, height: 600 }}>
+      <ServerBadge status={status} />
+      <div className="book-tabs">
+        <button className={tab === "reading" ? "active" : ""} onClick={() => setTab("reading")}>Currently Reading</button>
+        <button className={tab === "finished" ? "active" : ""} onClick={() => setTab("finished")}>Finished</button>
+        <button className={tab === "recommend" ? "active" : ""} onClick={() => setTab("recommend")}>Recommend a Book</button>
+        <button className={tab === "ai" ? "active" : ""} onClick={() => setTab("ai")}>AI Recommender</button>
+      </div>
+      <div className="book-tab-body">
+        {status === "offline"
+          ? <div className="tool-offline">Server is offline — book data needs the backend running.</div>
+          : !loaded
+            ? <div className="tool-status">Loading…</div>
+            : tab === "reading" ? <BookList books={books.filter((b) => b.status === "reading")} />
+            : tab === "finished" ? <BookList books={books.filter((b) => b.status === "finished")} showRatings />
+            : tab === "recommend" ? <RecommendForm books={books} recs={recs} onSubmitted={refreshRecs} />
+            : <AiRecommender />
+        }
+      </div>
+    </AppWindow>
+  );
+}
+
+function BookList({ books, showRatings }) {
+  if (!books.length) return <div className="tool-status">(no books)</div>;
+  const casual = books.filter((b) => b.type === "casual");
+  const formal = books.filter((b) => b.type === "formal");
+  return (
+    <div>
+      <div className="book-section">
+        <h5>Casual</h5>
+        {casual.length === 0 ? <p className="book-empty">(none)</p> : casual.map((b) => (
+          <div key={b.id} className="book-row">
+            <div className="book-row-title">{b.title}</div>
+            <div className="book-row-author">{b.author}</div>
+            {showRatings && b.rating != null && <div className="book-row-rating">{"★".repeat(b.rating)}{"☆".repeat(5 - b.rating)}</div>}
+            {b.thoughts && <div className="book-row-thoughts">"{b.thoughts}"</div>}
+          </div>
+        ))}
+      </div>
+      <div className="book-section">
+        <h5>Formal</h5>
+        {formal.length === 0 ? <p className="book-empty">(none)</p> : formal.map((b) => (
+          <div key={b.id} className="book-row">
+            <div className="book-row-title">{b.title}</div>
+            <div className="book-row-author">{b.author}</div>
+            {showRatings && b.rating != null && <div className="book-row-rating">{"★".repeat(b.rating)}{"☆".repeat(5 - b.rating)}</div>}
+            {b.thoughts && <div className="book-row-thoughts">"{b.thoughts}"</div>}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function RecommendForm({ books, recs, onSubmitted }) {
+  const [title, setTitle] = useState("");
+  const [author, setAuthor] = useState("");
+  const [type, setType] = useState("casual");
+  const [note, setNote] = useState("");
+  const [feedback, setFeedback] = useState(null);
+
+  const known = useMemo(() => {
+    const set = new Set();
+    books.forEach((b) => set.add(b.title.toLowerCase()));
+    recs.forEach((r) => set.add(r.book.title.toLowerCase()));
+    return set;
+  }, [books, recs]);
+
+  const submit = async (e) => {
+    e.preventDefault();
+    const t = title.trim();
+    if (!t) return;
+    if (known.has(t.toLowerCase())) {
+      setFeedback({ kind: "warn", msg: `"${t}" is already on the list — thanks though!` });
+      return;
+    }
+    try {
+      const res = await fetch(`${API_BASE}/books/recommendations`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: t, author: author.trim() || null, type, note: note.trim() || null }),
+      });
+      if (!res.ok) { setFeedback({ kind: "err", msg: "Something went wrong — try again later." }); return; }
+      setFeedback({ kind: "ok", msg: `Thanks for recommending "${t}"!` });
+      setTitle(""); setAuthor(""); setNote(""); setType("casual");
+      onSubmitted?.();
+    } catch { setFeedback({ kind: "err", msg: "Request failed — is the server running?" }); }
+  };
+
+  return (
+    <div>
+      <p className="book-intro">Think I'd enjoy something? Drop it below.</p>
+      <form onSubmit={submit} className="book-form">
+        <input type="text" placeholder="Book title" value={title} onChange={(e) => setTitle(e.target.value)} required />
+        <input type="text" placeholder="Author (optional)" value={author} onChange={(e) => setAuthor(e.target.value)} />
+        <select value={type} onChange={(e) => setType(e.target.value)}>
+          <option value="casual">Casual read</option>
+          <option value="formal">Formal / textbook</option>
+        </select>
+        <textarea placeholder="Why should I read this? (optional)" rows="3" value={note} onChange={(e) => setNote(e.target.value)} />
+        <button type="submit" className="tool-btn">Send Recommendation</button>
+      </form>
+      {feedback && <div className={`tool-status ${feedback.kind}`}>{feedback.msg}</div>}
+      {recs.length > 0 && (
+        <div className="book-section" style={{ marginTop: 16 }}>
+          <h5>Recommendations from visitors ({recs.length})</h5>
+          {recs.map((r) => (
+            <div key={r.id} className="book-row">
+              <div className="book-row-title">{r.book.title}</div>
+              {r.book.author && r.book.author !== "Unknown" && <div className="book-row-author">{r.book.author}</div>}
+              {r.comment && <div className="book-row-thoughts">"{r.comment}"</div>}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function AiRecommender() {
+  const [query, setQuery] = useState("");
+  const [topN, setTopN] = useState(5);
+  const [statusMsg, setStatusMsg] = useState(null);
+  const [results, setResults] = useState([]);
+
+  const submit = async (e) => {
+    e.preventDefault();
+    const q = query.trim();
+    if (!q) return;
+    setStatusMsg("Thinking… (keywords → OpenLibrary → Vamana → rerank)"); setResults([]);
+    try {
+      const res = await fetch(`${API_BASE}/books/recommend`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: q, top_n: topN }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        setStatusMsg(`Error: ${err.detail}`);
+        return;
+      }
+      const data = await res.json();
+      if (!data.length) { setStatusMsg("No recommendations found."); return; }
+      setStatusMsg(null); setResults(data);
+    } catch { setStatusMsg("Request failed — is the server running?"); }
+  };
+
+  return (
+    <div>
+      <p className="book-intro">Describe what you're in the mood for and let the recommender find something for you.</p>
+      <form onSubmit={submit} className="book-form">
+        <textarea
+          placeholder='e.g. "a dense math book that reads like a story" or "stoic philosophy"'
+          rows="3"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          required
+        />
+        <div className="ai-controls">
+          <label>Results: <input type="number" min="1" max="20" value={topN} onChange={(e) => setTopN(Math.max(1, Math.min(20, +e.target.value || 5)))} /></label>
+          <button type="submit" className="tool-btn">Recommend</button>
+        </div>
+      </form>
+      {statusMsg && <div className="tool-status">{statusMsg}</div>}
+      {results.length > 0 && (
+        <div className="book-section" style={{ marginTop: 16 }}>
+          <h5>Top {results.length} matches</h5>
+          {results.map((b, i) => (
+            <div key={i} className="book-row">
+              <div className="book-row-title">{b.title}</div>
+              {b.author_name?.length > 0 && <div className="book-row-author">{b.author_name.join(", ")}</div>}
+              {b.subject?.length > 0 && <div className="book-row-subject">{b.subject.slice(0, 4).join(" · ")}</div>}
+              {b.key && <a className="book-row-link" href={`https://openlibrary.org${b.key}`} target="_blank" rel="noopener noreferrer">openlibrary →</a>}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 window.Terminal = Desktop;
