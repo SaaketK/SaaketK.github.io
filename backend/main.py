@@ -7,6 +7,11 @@ from tools.heic_converter import router as heic_router
 from tools.clipboard import router as clipboard_router
 from books.router import router as books_router
 from database.db import init_db, SessionLocal
+import os
+from dotenv import load_dotenv
+
+# Force load the .env file explicitly from the project root
+load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
 
 app = FastAPI(title="SaaketK Backend")
 
@@ -25,6 +30,10 @@ app.include_router(heic_router,      prefix="/heic",      tags=["HEIC Converter"
 app.include_router(clipboard_router, prefix="/clipboard", tags=["Clipboard"])
 app.include_router(books_router,     prefix="/books",     tags=["Books"])
 
+
+@app.get("/ping")
+def ping():
+    return {"status": "pong"}
 
 @app.get("/health")
 def health():

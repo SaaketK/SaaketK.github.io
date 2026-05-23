@@ -91,6 +91,7 @@ def recommend_books(body: RecommendRequest):
     if not keywords:
         raise HTTPException(status_code = 503, detail = "Failure to extract keywords")
     candidates = search_books(keywords, limit=10_000)
+    print(f"DEBUG: Open Library returned {len(candidates)} candidates.")
     if not candidates:
         raise HTTPException(status_code = 404, detail = "No books found for given query")
     candidates = vamana_filter(candidates, body.query, top_k = 200)
