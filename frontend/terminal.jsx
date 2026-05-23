@@ -225,7 +225,7 @@ double-click \`github\` to open it.`
 
 self-study work through MIT's operating systems course (6.1810, fall 2024 materials). xv6 is a small unix-like teaching kernel written in C, derived from version 6 unix and ported to RISC-V.
 
-  lab utilities    — ls/find/xargs in xv6          ✓
+  lab utilities    — ls/find/xargs in xv6           ✓
   lab syscall      — adding system calls            ✓
   lab pgtbl        — page table manipulation        ✓
   lab traps        — backtraces & alarms            ✓
