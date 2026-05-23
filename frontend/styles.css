@@ -281,7 +281,7 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 4px;
-  width: 92px;
+  width: 108px;
   padding: 6px 4px;
   cursor: pointer;
   border: 1px dotted transparent;
@@ -455,7 +455,7 @@ body {
   overflow-y: auto;
 }
 .file-window .file-icon {
-  width: 100px;
+  width: 148px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -466,7 +466,7 @@ body {
 }
 .file-window .file-icon:hover { background: rgba(0,80,160,0.1); }
 .file-window .file-icon .glyph { width: 44px; height: 38px; display: flex; align-items: center; justify-content: center; margin-bottom: 4px; }
-.file-window .file-icon .label { font-size: 16px; text-align: center; line-height: 1.15; }
+.file-window .file-icon .label { font-size: 16px; text-align: center; line-height: 1.15; word-break: break-word; }
 
 /* legacy backdrop fallback */
 .term-backdrop {

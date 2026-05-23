@@ -36,21 +36,15 @@ const FS = {
   "about_me": {
     type: "file",
     content:
-`hi — i'm saaket.
+`hi — i'm Saaket.
 
-CS major at NJIT.
-double minor in computer engineering &
-computational mathematics.
+CS major at NJIT. double minor in computer engineering & computational mathematics.
 
 current work:
-  researching ANNS algorithm performance
-  on Intel AMX CPUs and high-performance
-  GPU clusters. (summer 2026)
+  researching ANNS algorithm performance on Intel AMX CPUs and high-performance GPU clusters. (summer 2026)
 
 past work:
-  software engineering intern at Cardaverse.
-  web development frameworks & full-stack
-  engineering.
+  software engineering intern at Cardaverse. web development frameworks & full-stack engineering.
 
 interests:
   - computer architecture
@@ -87,8 +81,7 @@ reach me:
             content:
 `# book recommender
 
-a personalized book recommendation engine
-integrated into this site.
+a personalized book recommendation engine integrated into this site.
 
 stack:
   python (FastAPI)
@@ -112,8 +105,7 @@ systems work:
   pybind11 bridge to python
   batch embedding for performance
 
-repo: not yet public — will live at
-github.com/SaaketK/book-recommender`
+repo: not yet public — will live at github.com/SaaketK/book-recommender`
           },
           "pipeline.txt": {
             type: "file",
@@ -137,39 +129,18 @@ github.com/SaaketK/book-recommender`
             content:
 `# safepip
 
-a security wrapper around \`pip install\` that
-defends against typosquatting attacks on PyPI.
+a security wrapper around \`pip install\` that defends against typosquatting attacks on PyPI.
 
 what it does:
-  - validates package names against the top
-    1,000 PyPI packages using levenshtein
-    distance — common typos get flagged before
-    you install them
-  - displays PyPI metadata (summary, author,
-    creation date, last update)
-  - pulls GitHub repo stats (stars, forks,
-    open issues) when a package links one
+  - validates package names against the top 1,000 PyPI packages using levenshtein distance — common typos get flagged before you install them
+  - displays PyPI metadata (summary, author, creation date, last update)
+  - pulls GitHub repo stats (stars, forks, open issues) when a package links one
 
 architecture:
   - python CLI entry point + vetting logic
-  - C extension for levenshtein distance
-    (loaded via ctypes, cross-platform)
-  - auto-generated popular package constants
-    refreshable via \`safepip-constupdate\`
-  - graceful fallback: if the C extension
-    fails to load, metadata still works,
-    typo detection just skips
-
-install:
-  git clone https://github.com/SaaketK/Safepip.git
-  cd safepip
-  pip install -e .
-
-usage:
-  safepip <package>
-  safepip gunicor          # asks "did you mean gunicorn?"
-  safepip requests==2.31.0 # versions supported
-
+  - C extension for levenshtein distance (loaded via ctypes, cross-platform)
+  - auto-generated popular package constants refreshable via \`safepip-constupdate\`
+  - graceful fallback: if the C extension fails to load, metadata still works, typo detection just skips
 repo: github.com/SaaketK/Safepip
 double-click \`github\` to open it.`
           },
@@ -187,33 +158,23 @@ double-click \`github\` to open it.`
             content:
 `# python-gds-webscraper
 
-a python utility for retrieving NJIT
-highlander commons dining hall menus.
-also powers the GDS menu tool in the
-\`tools/\` folder.
+a python utility for retrieving NJIT highlander commons dining hall menus. also powers the GDS menu tool in the \`tools/\` folder.
 
 features:
-  - date flexibility: today, tomorrow, or
-    a specific YYYY-MM-DD
-  - station targeting: focuses on the daily
-    plate (all meals) and carved & crafted
-    (lunch + dinner)
+  - date flexibility: today, tomorrow, or a specific YYYY-MM-DD
+  - station targeting: focuses on the daily plate (all meals) and carved & crafted (lunch + dinner)
   - automatic period_id resolution per meal
 
 how it works:
-  1. hits the /periods endpoint for the date
-     to find the unique ID for the meal
-  2. uses the period_id + LOCATION_ID + date
-     to pull the full menu JSON, then parses
-     the requested categories
+  1. hits the /periods endpoint for the date to find the unique ID for the meal
+  2. uses the period_id + LOCATION_ID + date to pull the full menu JSON, then parses the requested categories
 
 inputs:
   date  -> today | tomorrow | YYYY-MM-DD
   meal  -> breakfast | lunch | dinner
 
 stack:
-  python + cloudscraper (cloudflare-aware
-  HTTP wrapper around requests)
+  python + cloudscraper (cloudflare-aware HTTP wrapper around requests)
 
 repo: github.com/SaaketK/Python-GDS-Webscraper
 double-click \`github\` to open it.`
@@ -232,34 +193,17 @@ double-click \`github\` to open it.`
             content:
 `# snaphealth
 
-Anthropic Claude Builder Club Hackathon
-Spring 2026.
+Anthropic Claude Builder Club Hackathon Spring 2026.
 
-developers: Roshan Tailor, Saaket Kulkarni,
-            Frederick Rajakumar
+developers: Roshan Tailor, Saaket Kulkarni, Frederick Rajakumar
 
-an AI-powered health literacy and triage
-tool for people without easy access to
-medical guidance.
+an AI-powered health literacy and triage tool for people without easy access to medical guidance.
 
 the problem:
-  healthcare literacy is one of the most
-  unevenly distributed resources in the
-  world. whether you're uninsured, dealing
-  with a language barrier, or unable to get
-  a timely appointment, understanding what's
-  happening to yourself is a privilege many
-  don't have.
+  healthcare literacy is one of the most unevenly distributed resources in the world. whether you're uninsured, dealing with a language barrier, or unable to get a timely appointment, understanding what's happening to yourself is a privilege many don't have.
 
 the solution:
-  users can describe symptoms in plain text,
-  upload a photo of a wound or skin condition,
-  or point their camera at a medication label
-  and receive a clear, structured assessment
-  in plain english. it doesn't replace a
-  doctor — it helps people understand what
-  they're looking at well enough to take
-  the right next step.
+  users can describe symptoms in plain text, upload a photo of a wound or skin condition, or point their camera at a medication label and receive a clear, structured assessment in plain english. it doesn't replace a doctor — it helps people understand what they're looking at well enough to take the right next step.
 
 live: snaphealth.vercel.app
 repo: github.com/RTailor2301/SnapHealth
@@ -279,29 +223,15 @@ double-click \`github\` to open it.`
             content:
 `# MIT 6.1810 — xv6 labs
 
-self-study work through MIT's operating
-systems course (6.1810, fall 2024 materials).
-xv6 is a small unix-like teaching kernel
-written in C, derived from version 6 unix
-and ported to RISC-V.
+self-study work through MIT's operating systems course (6.1810, fall 2024 materials). xv6 is a small unix-like teaching kernel written in C, derived from version 6 unix and ported to RISC-V.
 
-[TODO: fill in which labs you've completed
-and any notable details. some examples
-to draw from:]
-
+completed:
   lab utilities    — ls/find/xargs in xv6
   lab syscall      — adding system calls
   lab pgtbl        — page table manipulation
   lab traps        — backtraces & alarms
-  lab cow          — copy-on-write fork
-  lab thread       — user-level threads
-  lab net          — network stack driver
-  lab lock         — fine-grained locking
-  lab fs           — large files + symlinks
-  lab mmap         — memory-mapped files
 
-repo: private. ask me directly if you want
-to see the work.`
+repo: private. ask me directly if you want to see the work.`
           }
         }
       }
@@ -315,8 +245,7 @@ to see the work.`
         content:
 `# HEIC -> JPEG converter
 
-batch convert apple HEIC photos to JPEG with
-full color profile accuracy.
+batch convert apple HEIC photos to JPEG with full color profile accuracy.
 
 backend:
   python (pillow + pillow_heif)
@@ -350,8 +279,7 @@ NJIT highlander commons dining menu.
 backend:
   python + cloudscraper
   hits dineoncampus.com api directly
-  filters to "the daily plate" and
-  "carved & crafted" stations.
+  filters to "the daily plate" and "carved & crafted" stations.
 
 endpoint:
   GET /gds/menu?date=today&meal=lunch`
@@ -361,8 +289,7 @@ endpoint:
         content:
 `# clipboard -> download
 
-paste an image from your clipboard, get a
-proper file download with a timestamped name.
+paste an image from your clipboard, get a proper file download with a timestamped name.
 
 backend:
   python + fastapi multipart
@@ -388,8 +315,9 @@ i read anything in:
   - philosophy
   - psychology
 
-open to recommendations outside these too —
-recommend something via the recommend.md file.`
+open to recommendations outside these too — think i'd enjoy something? send it my way.
+
+→ open Applications/Books to send a recommendation (or to try the AI recommender for yourself)`
       },
       "currently_reading.md": {
         type: "file",
@@ -397,13 +325,13 @@ recommend something via the recommend.md file.`
 `# currently reading
 
 casual:
-  - the denial of death — ernest becker (pg 56) *
-  - inferno — dante alighieri
+  - The Denial of Death — Ernest Becker
+  - Gödel, Escher Bach - Douglas Hofstadter
+  - Inferno — Dante Alighieri
 
 formal:
-  - PDEs: an introduction — walter a. strauss
-
-(* = current standout)`
+  - Classical Mechanics — John R. Taylor
+  - PDEs: An Introduction — Walter A. Strauss`
       },
       "finished.md": {
         type: "file",
@@ -421,26 +349,12 @@ casual:
   - notes from underground — dostoevsky
   - the idiot — dostoevsky
 
-formal (selected chapters):
-  - the information — james gleick
-  - computer architecture: a quantitative
-    approach — hennessy & patterson
+formal (textbooks):
+  - Computer Systems: A Programmer's Perspective — Randal Bryant & David O'Hallaron
+  - computer architecture: a quantitative approach — hennessy & patterson
 
 [TODO: add ratings + quick thoughts for each]`
       },
-      "recommend.md": {
-        type: "file",
-        content:
-`# recommend a book
-
-think i'd enjoy something? send it my way.
-
-i'm into math, physics, engineering, philosophy,
-and psychology — but i'm open to anything good.
-
-→ open Applications/Books to send a recommendation
-  (or to try the AI recommender for yourself)`
-      }
     }
   },
   "top_secret/": {
@@ -449,14 +363,7 @@ and psychology — but i'm open to anything good.
       "???.txt": {
         type: "file",
         content:
-`[TODO: fill in]
-
-what goes here is up to you. some ideas:
-  - personal essays / writing
-  - blog drafts
-  - long-form thoughts on a topic
-  - projects you don't want to advertise
-  - whatever feels right`
+`[TODO: fill in]`
       }
     }
   },
@@ -465,8 +372,7 @@ what goes here is up to you. some ideas:
     content:
 `welcome to my room.
 
-this is my personal site, rendered as the
-desk i actually work at.
+this is my personal site, rendered as the desk i actually work at.
 
   - double-click any folder to browse it
   - double-click a file to read it
@@ -707,7 +613,7 @@ function FileViewer({ name, content, onClose, offsetIndex = 0, zIndex = 200, onF
       <div
         onMouseDown={onHeaderMouseDown}
         style={{
-          background: "#d4b840", padding: "4px 8px",
+          background: "#d4b840", padding: "4px 14px",
           display: "flex", justifyContent: "space-between", alignItems: "center",
           borderBottom: "1px solid #b8a040",
           cursor: "move", userSelect: "none"
@@ -721,7 +627,7 @@ function FileViewer({ name, content, onClose, offsetIndex = 0, zIndex = 200, onF
         }}>✕</button>
       </div>
       <div style={{
-        padding: "16px 22px", whiteSpace: "pre-wrap", fontSize: 19,
+        padding: "16px 32px", whiteSpace: "pre-wrap", wordBreak: "break-word", fontSize: 19,
         color: "#2a1a00", height: size.height - 80, overflowY: "auto", lineHeight: 1.55
       }}>
         {linkifyContent(content)}
@@ -850,7 +756,7 @@ function Desktop({ onClose }) {
           ))}
         </div>
 
-        <TerminalPanel ref={termRef} onClose={onClose} />
+        <TerminalPanel ref={termRef} onClose={onClose} onOpenApp={openApp} />
       </div>
 
       {/* taskbar */}
@@ -987,7 +893,7 @@ function FileWindow({ path, onClose, onOpenFile, onOpenDir, zIndex = 200, onFocu
 // ============================================================
 // Terminal panel
 // ============================================================
-const TerminalPanel = React.forwardRef(function TerminalPanel({ onClose }, ref) {
+const TerminalPanel = React.forwardRef(function TerminalPanel({ onClose, onOpenApp }, ref) {
   const [cwd, setCwd] = useState([]);
   const [history, setHistory] = useState(() => [
     { type: "boot", text: "RoomOS shell v0.3" },
@@ -1031,6 +937,8 @@ const TerminalPanel = React.forwardRef(function TerminalPanel({ onClose }, ref) 
           { type: "out", text: "  cat <file>     print a file" },
           { type: "out", text: "  tree           show full filesystem" },
           { type: "out", text: "  whoami         a little about me" },
+          { type: "out", text: "  run <app>      open an application (books, tools)" },
+          { type: "out", text: "  ping           ping the server and show response time" },
           { type: "out", text: "  clear          clear the screen" },
           { type: "out", text: "  exit           close the desktop" },
           { type: "dim", text: "" },
@@ -1082,6 +990,37 @@ const TerminalPanel = React.forwardRef(function TerminalPanel({ onClose }, ref) 
         break;
       }
       case "whoami": { push({ type: "out", text: "saaket — CS @ NJIT / systems / books / occasional sleeper" }); break; }
+      case "run": {
+        const appName = args[0]?.toLowerCase();
+        const appMap = { books: "books", tools: "tools" };
+        if (!appName) {
+          push({ type: "err", text: "run: missing argument. usage: run <app>" });
+          push({ type: "dim", text: "available apps: books, tools" });
+        } else if (appMap[appName]) {
+          push({ type: "out", text: `launching ${appName}…` });
+          onOpenApp(appMap[appName]);
+        } else {
+          push({ type: "err", text: `run: ${args[0]}: no such application` });
+          push({ type: "dim", text: "available apps: books, tools" });
+        }
+        break;
+      }
+      case "ping": {
+        push({ type: "dim", text: "pinging server…" });
+        (async () => {
+          const t0 = performance.now();
+          try {
+            const res = await fetch(`${API_BASE}/ping`, { signal: AbortSignal.timeout(5000) });
+            const ms = (performance.now() - t0).toFixed(1);
+            if (res.ok) push({ type: "out", text: `pong — ${ms} ms` });
+            else push({ type: "err", text: `server returned ${res.status} (${ms} ms)` });
+          } catch {
+            const ms = (performance.now() - t0).toFixed(1);
+            push({ type: "err", text: `request failed after ${ms} ms` });
+          }
+        })();
+        break;
+      }
       case "clear": { setHistory([]); break; }
       case "exit": case "quit": case "q": { onClose(); break; }
       case "sudo": { push({ type: "warn", text: "nice try." }); break; }
