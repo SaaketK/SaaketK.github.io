@@ -1,5 +1,10 @@
 from sentence_transformers import SentenceTransformer
 import numpy as np
+import os
+from dotenv import load_dotenv
+
+# Force load the .env file explicitly from the project root
+load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
 
 model = SentenceTransformer("all-MiniLM-L6-v2")
 
