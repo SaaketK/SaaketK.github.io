@@ -224,17 +224,16 @@ double-click \`github\` to open it.`
 `# MIT 6.1810 — xv6 labs
 
 self-study work through MIT's operating systems course (6.1810, fall 2024 materials). xv6 is a small unix-like teaching kernel written in C, derived from version 6 unix and ported to RISC-V.
-
-  lab utilities    — ls/find/xargs in xv6           ✓
-  lab syscall      — adding system calls            ✓
-  lab pgtbl        — page table manipulation        ✓
-  lab traps        — backtraces & alarms            ✓
-  lab cow          — copy-on-write fork
-  lab thread       — user-level threads
-  lab net          — network stack driver
-  lab lock         — fine-grained locking
-  lab fs           — large files + symlinks
-  lab mmap         — memory-mapped files
+Labs:
+  utilities       — sleep/find/exec in xv6         ✓
+  syscall         — adding system calls            ✓
+  pgtbl           — page table manipulation        ✓
+  traps           — backtraces & alarms            ✓
+  copy-on-write
+  network driver
+  lock        
+  file system
+  mmap        
 
 repo: private. ask me directly if you want to see the work.`
           }
