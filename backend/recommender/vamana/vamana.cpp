@@ -3,268 +3,373 @@
 #include <cassert>
 #include <iostream>
 #include <random>
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
-// Distance Helpers
+// ─────────────────────────────────────────────────────────────────────────────
+// Performance notes:
+//   - All node vectors are L2-normalized inside build() once. After that,
+//     cosine distance between two stored vectors is simply (1 - dot(a, b)),
+//     which removes two sqrt() calls per distance computation.
+//   - The query vector is normalized once inside search() before beam_search,
+//     so dist_to_query is also a single dot product.
+//   - find_medoid is O(n) (centroid-nearest) instead of the original O(n²).
+//   - Greedy/beam search uses the standard DiskANN pattern with proper early
+//     termination: maintain a top-L sorted candidate set, expand the closest
+//     unexpanded node, stop when none remain. This visits O(L) nodes per
+//     search instead of potentially all reachable nodes.
+// ─────────────────────────────────────────────────────────────────────────────
+
+
+// ── Distance Helpers ─────────────────────────────────────────────────────────
+// Both arguments assumed L2-normalized when use_cosine is true.
 
 float VamanaIndex::dist(int a, int b) const {
-    return cfg_.use_cosine ? distance::cosine(nodes_[a].vec, nodes_[b].vec) : distance::l2_squared(nodes_[a].vec, nodes_[b].vec);
-}
+    const auto& va = nodes_[a].vec;
+    const auto& vb = nodes_[b].vec;
+    const size_t d = va.size();
 
-float VamanaIndex::dist_to_query(const std::vector<float>& q, int b) const {
-    return cfg_.use_cosine ? distance::cosine(q, nodes_[b].vec) : distance::l2_squared(q, nodes_[b].vec);
-}
-
-// Find the medoid (node whose average distance to all others is smallest; basically center of the graph)
-// O(n^2) complexity
-
-int VamanaIndex::find_medoid() const {
-    int n = static_cast<int>(nodes_.size());
-    int best = 0;
-    float best_sum = std::numeric_limits<float>::max();
-
-    for(int i = 0; i < n; i++){
+    if (cfg_.use_cosine) {
+        float dot = 0.f;
+        for (size_t i = 0; i < d; i++) dot += va[i] * vb[i];
+        return 1.f - dot;
+    } else {
         float sum = 0.f;
-        for(int j = 0; j < n; j++){
-            sum += dist(i, j);
+        for (size_t i = 0; i < d; i++) {
+            float diff = va[i] - vb[i];
+            sum += diff * diff;
         }
-        if(sum < best_sum){
-            best_sum = sum;
-            best = i;
+        return sum;
+    }
+}
+
+// Query is normalized in search() before any calls reach here.
+float VamanaIndex::dist_to_query(const std::vector<float>& q, int b) const {
+    const auto& vb = nodes_[b].vec;
+    const size_t d = q.size();
+
+    if (cfg_.use_cosine) {
+        float dot = 0.f;
+        for (size_t i = 0; i < d; i++) dot += q[i] * vb[i];
+        return 1.f - dot;
+    } else {
+        float sum = 0.f;
+        for (size_t i = 0; i < d; i++) {
+            float diff = q[i] - vb[i];
+            sum += diff * diff;
         }
+        return sum;
+    }
+}
+
+
+// ── Medoid: O(n) centroid-nearest ────────────────────────────────────────────
+// Original was O(n²). For 8k nodes × 384 dims that was ~70M distance calls.
+int VamanaIndex::find_medoid() const {
+    int n   = static_cast<int>(nodes_.size());
+    int dim = static_cast<int>(nodes_[0].vec.size());
+
+    std::vector<float> centroid(dim, 0.f);
+    for (const auto& node : nodes_)
+        for (int d = 0; d < dim; d++)
+            centroid[d] += node.vec[d];
+    for (float& v : centroid) v /= static_cast<float>(n);
+
+    // Normalize centroid so we can use the same fast dot-product distance.
+    if (cfg_.use_cosine) {
+        float norm = 0.f;
+        for (float v : centroid) norm += v * v;
+        norm = std::sqrt(norm);
+        if (norm > 0.f) for (float& v : centroid) v /= norm;
+    }
+
+    int best = 0;
+    float best_dist = std::numeric_limits<float>::max();
+    for (int i = 0; i < n; i++) {
+        float d;
+        if (cfg_.use_cosine) {
+            float dot = 0.f;
+            for (size_t k = 0; k < centroid.size(); k++) dot += centroid[k] * nodes_[i].vec[k];
+            d = 1.f - dot;
+        } else {
+            d = distance::l2_squared(centroid, nodes_[i].vec);
+        }
+        if (d < best_dist) { best_dist = d; best = i; }
     }
     return best;
 }
 
-// Initialize each node with R random distinct neighbors
 
-void VamanaIndex::init_random_graph(std::mt19937& rng){
+// ── Random graph init ────────────────────────────────────────────────────────
+void VamanaIndex::init_random_graph(std::mt19937& rng) {
     int n = static_cast<int>(nodes_.size());
     adj_.assign(n, {});
 
-    std::vector<int> pool(n);
-    std::iota(pool.begin(), pool.end(), 0);
+    if (n <= 1 || cfg_.R <= 0) return;
 
-    for(int i = 0; i < n; i++){
-        std::vector<int> candidates;
-        candidates.reserve(cfg_.R);
-        // partial Fisher-Yates shuffle to pick R neighbors != i
-        std::vector<int> tmp = pool;
+    const int target_degree = std::min(cfg_.R, n - 1);
+    const uint32_t base_seed = rng();
+
+    #pragma omp parallel for schedule(static)
+    for (int i = 0; i < n; i++) {
+        std::mt19937 local_rng(base_seed + static_cast<uint32_t>(i) * 2654435761u);
+        std::uniform_int_distribution<int> ud(0, n - 1);
+
+        adj_[i].reserve(target_degree);
         int picks = 0;
-        for(int k = n - 1; k >= 0 && picks < cfg_.R; k--){
-            std::uniform_int_distribution<int> ud(0, k);
-            int j = ud(rng);
-            std::swap(tmp[j], tmp[k]);
-            if(tmp[k] != i){
-                candidates.push_back(tmp[k]);
-                picks++;
+        while (picks < target_degree) {
+            int j = ud(local_rng);
+            if (j == i) continue;
+
+            bool duplicate = false;
+            for (int existing : adj_[i]) {
+                if (existing == j) {
+                    duplicate = true;
+                    break;
+                }
             }
+            if (duplicate) continue;
+
+            adj_[i].push_back(j);
+            picks++;
         }
-        adj_[i] = std::move(candidates);
     }
 }
 
-// Greedy Beam Search from a node index to another node index
-// Candidates returned in ascending order of distance to target
 
-std::vector<Candidate> VamanaIndex::internal_greedy_search(int start, int target, int L) const {
-    std::vector<bool> visited(nodes_.size(), false);
+// ── Greedy search (build phase): DiskANN-style with early termination ───────
+// Returns ALL visited nodes (used by prune as the candidate pool).
+std::vector<Candidate> VamanaIndex::internal_greedy_search(int start, int target, int L,
+                                                             std::vector<std::mutex>* locks) const {
+    int n = static_cast<int>(nodes_.size());
+    std::vector<char> visited(n, 0);
+    std::vector<char> expanded(n, 0);
 
-    // min heap of (dist-to-target, node)
-    std::priority_queue<Candidate, std::vector<Candidate>, MinCmp> front;
-    // track visited nodes
-    std::vector<Candidate> seen;
+    std::vector<Candidate> L_set;
+    L_set.reserve(L + 1);
 
-    auto push = [&](int node_id) {
-        if(visited[node_id]) return;
-        visited[node_id] = true;
-        float d = dist(node_id, target);
-        front.push({d, node_id});
-        seen.push_back({d, node_id});
+    auto try_insert_L = [&](Candidate c) {
+        auto it = std::lower_bound(L_set.begin(), L_set.end(), c);
+        L_set.insert(it, c);
+        if (static_cast<int>(L_set.size()) > L) L_set.pop_back();
     };
 
-    push(start);
+    visited[start] = 1;
+    try_insert_L({dist(start, target), start});
 
-    while(!front.empty()){
-        auto [d, p] = front.top(); 
-        front.pop();
-
-        // Expand Neighbors
-        for(int nbr : adj_[p]){
-            push(nbr);
+    while (true) {
+        int p = -1;
+        for (const auto& c : L_set) {
+            if (!expanded[c.second]) { p = c.second; break; }
         }
-        
-        // Bound front by L
-        if(static_cast<int>(front.size()) > L){
-            std::vector<Candidate> tmp;
-            tmp.reserve(L);
-            while(!front.empty()){
-                tmp.push_back(front.top());
-                front.pop();
+        if (p < 0) break;
+        expanded[p] = 1;
+
+        // Take a safe snapshot of adj_[p] under lock if running in parallel.
+        // Without this, a concurrent push_back on adj_[p] can trigger reallocation
+        // and leave this thread with a dangling pointer — silent crash.
+        std::vector<int> nbrs;
+        if (locks) {
+            std::lock_guard<std::mutex> lk((*locks)[p]);
+            nbrs = adj_[p];
+        } else {
+            nbrs = adj_[p];
+        }
+
+        for (int nbr : nbrs) {
+            if (visited[nbr]) continue;
+            visited[nbr] = 1;
+            float d = dist(nbr, target);
+            if (static_cast<int>(L_set.size()) < L || d < L_set.back().first) {
+                try_insert_L({d, nbr});
             }
-            if(static_cast<int>(tmp.size()) > L){
-                tmp.resize(L);
-            }
-            for(auto& c : tmp) front.push(c);
         }
     }
-    std::sort(seen.begin(), seen.end()); // Ascending 
-    return seen;
+
+    return L_set;   // top-L, sorted ascending
 }
 
-// Beam Search from entry point to query vector
-// Visited Candidates returned in ascending order of distance to query
+
+// ── Beam search (query phase): same pattern as above ─────────────────────────
+// Returns top-L sorted ascending — that's all we need for search().
 std::vector<Candidate> VamanaIndex::beam_search(const std::vector<float>& query, int start, int L) const {
-    std::vector<bool> visited(nodes_.size(), false);
+    int n = static_cast<int>(nodes_.size());
+    std::vector<char> visited(n, 0);
+    std::vector<char> expanded(n, 0);
 
-    std::priority_queue<Candidate, std::vector<Candidate>, MinCmp> front;
-    std::vector<Candidate> seen;
+    std::vector<Candidate> L_set;
+    L_set.reserve(L + 1);
 
-    auto push = [&](int node_id) {
-        if(visited[node_id]) return;
-        visited[node_id] = true;
-        float d = dist_to_query(query, node_id);
-        front.push({d, node_id});
-        seen.push_back({d, node_id});
+    auto try_insert_L = [&](Candidate c) {
+        auto it = std::lower_bound(L_set.begin(), L_set.end(), c);
+        L_set.insert(it, c);
+        if (static_cast<int>(L_set.size()) > L) L_set.pop_back();
     };
 
-    push(start);
+    visited[start] = 1;
+    try_insert_L({dist_to_query(query, start), start});
 
-    while(!front.empty()){
-        auto [d, p] = front.top(); 
-        front.pop();
-
-        // Expand Neighbors
-        for(int nbr : adj_[p]){
-            push(nbr);
+    while (true) {
+        int p = -1;
+        for (const auto& c : L_set) {
+            if (!expanded[c.second]) { p = c.second; break; }
         }
-        
-        // Bound front by L
-        if(static_cast<int>(front.size()) > L){
-            std::vector<Candidate> tmp;
-            while(!front.empty()){
-                tmp.push_back(front.top());
-                front.pop();
+        if (p < 0) break;
+        expanded[p] = 1;
+
+        for (int nbr : adj_[p]) {
+            if (visited[nbr]) continue;
+            visited[nbr] = 1;
+            float d = dist_to_query(query, nbr);
+            if (static_cast<int>(L_set.size()) < L || d < L_set.back().first) {
+                try_insert_L({d, nbr});
             }
-            if(static_cast<int>(tmp.size()) > L) tmp.resize(L);
-            for(auto& c: tmp) front.push(c);
         }
     }
-    std::sort(seen.begin(), seen.end()); // Ascending 
-    return seen;
+
+    return L_set;   // already sorted ascending
 }
 
 
-// Robust Prune: Select at most R diverse neighbors for node p
+// ── Robust Prune (unchanged logic) ───────────────────────────────────────────
+void VamanaIndex::prune(int p, std::vector<Candidate>& candidates) {
+    candidates.erase(
+        std::remove_if(candidates.begin(), candidates.end(),
+                       [p](const Candidate& c){ return c.second == p; }),
+        candidates.end());
 
-void VamanaIndex::prune(int p, std::vector<Candidate>& candidates){
-
-    // Remove self
-    candidates.erase(std::remove_if(candidates.begin(), candidates.end(), [p](const Candidate& c){ return c.second == p;}), candidates.end());
-    
-    // Sort in ascending distance to p
     std::sort(candidates.begin(), candidates.end());
-    
+
     std::vector<int> result;
     result.reserve(cfg_.R);
-    std::vector<bool> pruned(candidates.size(), false);
+    std::vector<char> pruned(candidates.size(), 0);
 
-    for(size_t i = 0; i < candidates.size() && static_cast<int>(result.size()) < cfg_.R; i++){
-        if(pruned[i]) continue;
+    for (size_t i = 0; i < candidates.size() && static_cast<int>(result.size()) < cfg_.R; i++) {
+        if (pruned[i]) continue;
         int v_star = candidates[i].second;
         result.push_back(v_star);
 
-        // Prune candidates shadowed by v star
-        // Remove c if alpha * dist(v_star, c) <= dist(p, c)
-        for(size_t j = i + 1; j < candidates.size(); j++){
-            if(pruned[j]) continue;
-            int c_id = candidates[j].second;
-            float dist_p_c = candidates[j].first;
-            float dist_vstar_c = dist(v_star, c_id);
-            if(cfg_.alpha * dist_vstar_c <= dist_p_c){
-                pruned[j] = true;
-            }
+        for (size_t j = i + 1; j < candidates.size(); j++) {
+            if (pruned[j]) continue;
+            float dist_p_c     = candidates[j].first;
+            float dist_vstar_c = dist(v_star, candidates[j].second);
+            if (cfg_.alpha * dist_vstar_c <= dist_p_c) pruned[j] = 1;
         }
     }
     adj_[p] = std::move(result);
 }
 
-// Main Vamana Graph Construction
 
-void VamanaIndex::build(std::vector<BookNode> books){
-    if (books.empty()){
+void VamanaIndex::build(std::vector<BookNode> books) {
+    if (books.empty())
         throw std::invalid_argument("No books provided to VamanaIndex::build");
-    }
 
     nodes_ = std::move(books);
-    int n = static_cast<int>(nodes_.size());
+    int n  = static_cast<int>(nodes_.size());
 
-    // Use seed 42 for testing, replace with rd later
-    // std::random_device rd; 
+    if (cfg_.use_cosine) {
+        for (auto& node : nodes_) {
+            float norm = 0.f;
+            for (float v : node.vec) norm += v * v;
+            norm = std::sqrt(norm);
+            if (norm > 0.f) for (float& v : node.vec) v /= norm;
+        }
+    }
+
     std::mt19937 rng(42);
     init_random_graph(rng);
 
-    // For 10k nodes the medoid seach takes ~10^8 operations
-    // If it takes too long, swap for centroid-nearest
     std::cerr << "Vamana:\n Finding medoid over " << n << " nodes\n";
     medoid_ = find_medoid();
     std::cerr << "Medoid: " << medoid_ << "\n";
 
-    // Random visit order
     std::vector<int> order(n);
     std::iota(order.begin(), order.end(), 0);
     std::shuffle(order.begin(), order.end(), rng);
 
-    std::cerr << "Building graph (Max Nodes = " << cfg_.R << ", Search List Size = " << cfg_.L << ", alpha = " << cfg_.alpha << ")\n";
-    
-    for(int idx = 0; idx < n; idx++){
+    std::cerr << "Building graph (R=" << cfg_.R << ", L=" << cfg_.L
+              << ", alpha=" << cfg_.alpha << ")\n";
+#ifdef _OPENMP
+    std::cerr << "OpenMP threads: " << omp_get_max_threads() << "\n";
+#endif
+
+    // One mutex per node.
+    std::vector<std::mutex> locks(n);
+    std::atomic<int> done{0};
+
+    #pragma omp parallel for schedule(dynamic, 64)
+    for (int idx = 0; idx < n; idx++) {
         int p = order[idx];
 
-        // Greedy search from medoid to p
-        auto candidates = internal_greedy_search(medoid_, p, cfg_.L);
+        // Phase 1: greedy search — read adj_ with locked snapshots inside.
+        auto candidates = internal_greedy_search(medoid_, p, cfg_.L, &locks);
 
-        // Merge existing neighbors of p into candidates
-        for(int nb : adj_[p]){
-            candidates.push_back({dist(p, nb), nb});
+        // Phase 2: prune and update adj_[p] under its own lock.
+        {
+            std::lock_guard<std::mutex> lk(locks[p]);
+            for (int nb : adj_[p])
+                candidates.push_back({dist(p, nb), nb});
+
+            std::sort(candidates.begin(), candidates.end(),
+                      [](const Candidate& a, const Candidate& b){ return a.second < b.second; });
+            candidates.erase(
+                std::unique(candidates.begin(), candidates.end(),
+                            [](const Candidate& a, const Candidate& b){ return a.second == b.second; }),
+                candidates.end());
+
+            prune(p, candidates);
         }
 
-        // Remove duplicates by id
-        std::sort(candidates.begin(), candidates.end(), [](const Candidate& a, const Candidate& b){ return a.second < b.second; });
-        candidates.erase(std::unique(candidates.begin(), candidates.end(), [](const Candidate& a, const Candidate& b){ return a.second == b.second; }), candidates.end());
+        // Phase 3: reverse edges — always lock lower index first to prevent deadlock.
+        std::vector<int> nbrs;
+        {
+            std::lock_guard<std::mutex> lk(locks[p]);
+            nbrs = adj_[p];
+        }
 
-        // Pruning
-        prune(p, candidates);
-        
-        for(int q : adj_[p]){
+        for (int q : nbrs) {
+            // Acquire locks in consistent order (smaller index first) to avoid deadlock.
+            int lo = std::min(p, q), hi = std::max(p, q);
+            std::lock_guard<std::mutex> lk_lo(locks[lo]);
+            std::lock_guard<std::mutex> lk_hi(locks[hi]);
+
             adj_[q].push_back(p);
-            if(static_cast<int>(adj_[q].size()) > cfg_.R) {
-                // Build candidate list for q and prune again
+            if (static_cast<int>(adj_[q].size()) > cfg_.R) {
                 std::vector<Candidate> q_cands;
                 q_cands.reserve(adj_[q].size());
-                for(int nb : adj_[q]){
-                    q_cands.push_back({dist(q, nb), nb});
-                }
+                for (int nb : adj_[q]) q_cands.push_back({dist(q, nb), nb});
                 prune(q, q_cands);
             }
         }
-        if(idx % 1000 == 0){
-            std::cerr << idx << "/" << n << "nodes processed\n";
-        }
+
+        int cur = ++done;
+        if (cur % 1000 == 0)
+            std::cerr << cur << "/" << n << " nodes processed\n";
     }
+
     std::cerr << "Build Complete\n";
 }
 
-// Beam Search with top-k results
 
+// ── Search ───────────────────────────────────────────────────────────────────
 std::vector<int> VamanaIndex::search(const std::vector<float>& query, int top_k) const {
-    if(nodes_.empty()){
-        throw std::runtime_error("VamanaIndex is empty, build() must be run first");
+    if (nodes_.empty())
+        throw std::runtime_error("VamanaIndex is empty — call build() first");
+
+    // Normalize the query once so dist_to_query is a single dot product per call.
+    std::vector<float> q_norm = query;
+    if (cfg_.use_cosine) {
+        float norm = 0.f;
+        for (float v : q_norm) norm += v * v;
+        norm = std::sqrt(norm);
+        if (norm > 0.f) for (float& v : q_norm) v /= norm;
     }
-    auto candidates = beam_search(query, medoid_, cfg_.L);
+
+    auto candidates = beam_search(q_norm, medoid_, cfg_.L);
 
     int k = std::min(top_k, static_cast<int>(candidates.size()));
     std::vector<int> result(k);
-    for(int i = 0; i < k; i++){
-        result[i] = candidates[i].second;
-    }
+    for (int i = 0; i < k; i++) result[i] = candidates[i].second;
     return result;
 }

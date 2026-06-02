@@ -10,7 +10,8 @@
 #include <queue>
 #include <limits>
 #include <stdexcept>
-
+#include <mutex>
+#include <atomic>
 
 // Distance Utilities
 
@@ -74,7 +75,8 @@ class VamanaIndex {
 
         float dist(int a, int b) const;
         float dist_to_query(const std::vector<float>& q, int b) const;
-        std::vector<Candidate> internal_greedy_search(int start, int target, int L) const;
+        std::vector<Candidate> internal_greedy_search(int start, int target, int L,
+                                                       std::vector<std::mutex>* locks = nullptr) const;
         std::vector<Candidate> beam_search(const std::vector<float>& query, int start, int L) const;
         void prune(int p, std::vector<Candidate>& candidates);
         int find_medoid() const;

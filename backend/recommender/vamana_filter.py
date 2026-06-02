@@ -20,7 +20,9 @@ from recommender.embeddings import embed_single, embed_batch, build_book_text
 
 # Load Library
 
-_LIB_PATH = os.environ.get("VAMANA_LIB_PATH", str(Path(__file__).parent / "vamana" / "libvamana.so"),)
+import platform
+_lib_name = "libvamana.dylib" if platform.system() == "Darwin" else "libvamana.so"
+_LIB_PATH = os.environ.get("VAMANA_LIB_PATH", str(Path(__file__).parent / "vamana" / _lib_name))
 try:
     _lib = ctypes.CDLL(_LIB_PATH)
 except OSError:
@@ -80,7 +82,7 @@ def _vamana_filter_native(candidates: list[dict], book_vecs: list[list[float]], 
 
     return [candidates[out_ids[i]] for i in range(hits)]
 
-def vamana_filter(candidates: list[dict[str, Any]], query: str, top_k: int = 200, R: int = 48, L: int = 125, alpha: float = 1.2,) -> list[dict[str, Any]]:
+def vamana_filter(candidates: list[dict[str, Any]], query: str, top_k: int = 200, R: int = 32, L: int = 64, alpha: float = 1.2,) -> list[dict[str, Any]]:
     '''
     Given top 10k results from open library, return top_k nearest neighbors w/ Vamana
     If Vamana is unavailable, fall back is a cosine sort

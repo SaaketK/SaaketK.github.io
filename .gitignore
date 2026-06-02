@@ -1,0 +1,15 @@
+.venv/
+__pycache__/
+*.py[cod]
+
+# Benchmark-generated data/cache files
+backend/benchmarks/*.npy
+
+# Local/generated CMake dependency files
+backend/recommender/vamana/build/CMakeFiles/**/compiler_depend.internal
+*.env
+*.venv
+*__pycache__
+backend/recommender/vamana/build/
+backend/recommender/vamana/libvamana.so
+backend/recommender/vamana/build/libvamana.dylib

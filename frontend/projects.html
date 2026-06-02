@@ -1,60 +1,15 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Projects – Saaket K</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Opening RoomOS projects...</title>
+  <meta http-equiv="refresh" content="0; url=../index.html?open=projects" />
 </head>
 <body>
-  <nav id="navbar">
-    <div class="nav-inner">
-      <a href="../index.html" class="nav-logo">SK</a>
-      <div class="nav-links">
-        <a href="projects.html" class="active">Projects</a>
-        <a href="tools.html">Tools</a>
-        <a href="books.html">Books</a>
-        <a href="top-secret.html">Top Secret</a>
-      </div>
-    </div>
-  </nav>
-
-  <main>
-    <section id="projects">
-      <h2>Projects</h2>
-      <div class="project-grid">
-        <div class="project-card">
-          <h3>safepip</h3>
-          <p>A security wrapper around <code>pip install</code> that helps ensure you're installing the package you actually intend to install. Defends against typosquatting — where malicious packages use names that resemble popular ones with a small typo.</p>
-          <ul>
-            <li>Levenshtein distance check against the top 1,000 PyPI packages</li>
-            <li>Displays PyPI metadata: summary, author, creation date, last update</li>
-            <li>Pulls GitHub stats (stars, forks, open issues) when a repo is linked</li>
-            <li>Prompts for confirmation, then runs the real <code>pip install</code></li>
-          </ul>
-          <a href="https://github.com/SaaketK/Safepip" target="_blank" rel="noopener">View on GitHub →</a>
-        </div>
-        <div class="project-card">
-          <h3>SnapHealth</h3>
-          <p>Anthropic Claude Builder Club Hackathon — Spring 2026. Built with Roshan Tailor and Frederick Rajakumar.</p>
-          <p>An AI-powered health literacy and triage tool for people without easy access to medical guidance. Users can describe symptoms in plain text, upload a photo of a wound or skin condition, or point their camera at a medication label and receive a clear, structured assessment in plain English. It doesn't replace a doctor — it helps people understand what they're looking at well enough to take the right next step.</p>
-          <a href="https://snaphealth.vercel.app/" target="_blank" rel="noopener">Live App →</a>
-          <a href="https://github.com/RTailor2301/SnapHealth" target="_blank" rel="noopener">View on GitHub →</a>
-        </div>
-        <div class="project-card">
-          <h3>Book Recommender</h3>
-          <p>An AI-powered book recommendation engine integrated into this site. Uses Ollama (Mistral 7B) to extract search keywords from natural language queries, retrieves up to 10,000 candidates from OpenLibrary, narrows them to 200 with a custom C++ Vamana approximate nearest-neighbor index, then reranks using sentence-transformer embeddings.</p>
-        </div>
-        <div class="project-card">
-          <h3>MIT 6.1810 — xv6 Labs</h3>
-          <p>Self-study work through MIT's operating systems course (6.1810, fall 2024 materials). xv6 is a small Unix-like teaching kernel written in C and ported to RISC-V. Labs completed: utilities, syscall, page tables, traps, copy-on-write fork, user-level threads, network stack driver, fine-grained locking, large files &amp; symlinks, and memory-mapped files.</p>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <footer>
-    <p>&copy; 2026 Saaket K</p>
-  </footer>
+  <script>
+    window.location.replace("../index.html?open=projects");
+  </script>
+  <p>Opening <a href="../index.html?open=projects">RoomOS projects</a>...</p>
 </body>
 </html>

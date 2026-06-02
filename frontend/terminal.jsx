@@ -79,45 +79,136 @@ reach me:
           "about": {
             type: "file",
             content:
-`# book recommender
+`# AI Book Discovery Engine
 
-a personalized book recommendation engine integrated into this site.
+Spring 2026.
 
 stack:
-  python (FastAPI)
-  postgresql
-  ollama (mistral 7B)
-  sentence-transformers
-  c++ vamana index
+  C++
+  Python
+  PyBind11
+  FastAPI
+  SQLite
+  Docker
 
 pipeline:
-  user input
-    -> ollama (keyword extraction)
-  openlibrary api
-    -> ~10,000 candidates
-  c++ vamana ann index
-    -> top 200
-  embedding similarity rerank
-    -> top N
+  user query
+    -> mistral 7B keyword extraction
+  SQLite metadata lookup
+    -> candidate books
+  in-memory C++ Vamana graph routing
+    -> top-k results via FastAPI
+
+frontend:
+  React-based book discovery UI
+  natural-language reading requests
+  loading and error states
+  ranked results with titles, authors, subjects, and OpenLibrary links
 
 systems work:
-  custom vamana ann graph in c++
-  pybind11 bridge to python
-  batch embedding for performance
+  built a Vamana ANNS graph index from scratch in C++
+  parallelized graph search with OpenMP
+  reached up to 33x query speedup over brute-force FAISS
+  measured 96.0% Recall@10 on SIFT1M
+  exposed the C++ index to Python via PyBind11
+  containerized the full stack with Docker
 
-repo: not yet public — will live at github.com/SaaketK/book-recommender`
+repo: github.com/SaaketK/SaaketK.github.io/tree/main/backend/recommender
+double-click \`github\` to open it.`
+          },
+          "github": {
+            type: "link",
+            url: "https://github.com/SaaketK/SaaketK.github.io/tree/main/backend/recommender"
           },
           "pipeline.txt": {
             type: "file",
             content:
-`# pipeline status
+`# retrieval pipeline
 
-[done] keywords.py     — LLM keyword extraction
-[done] openlibrary.py  — API search (10k candidates)
-[done] embeddings.py   — cosine similarity rerank
-[done] vamana C++      — ANN index, top 200 filter
-[done] FastAPI route   — POST /books/recommend
-[wip ] vamana dylib    — needs Mac recompile`
+query
+  -> Mistral 7B keyword extraction
+  -> SQLite metadata lookup
+  -> in-memory C++ Vamana graph routing
+  -> FastAPI recommendation response
+  -> React ranked result cards`
+          }
+        }
+      },
+      "pinns/": {
+        type: "dir",
+        children: {
+          "about": {
+            type: "file",
+            content:
+`# Physics-Informed Neural Networks (PINNs)
+
+Summer 2026.
+
+stack:
+  Python
+  PyTorch
+  NumPy
+  C/CUDA (in progress)
+
+what it is:
+  a modular PINN framework in PyTorch with hard-enforced initial conditions. instead of soft boundary penalties, optimization is constrained purely to the physics residual of the governing ODE.
+
+results:
+  - applied to classical simple harmonic motion
+  - achieved lower maximum and average errors than finite difference methods across 10s, 30s, and 60s time periods
+  - extended to the quantum harmonic oscillator
+  - achieved up to a 2.3x PINN inference speedup over finite difference solve time
+
+current work:
+  building a C/CUDA PINN solver for the Black-Scholes equation
+
+repo: github.com/SaaketK/PINN
+double-click \`github\` to open it.`
+          },
+          "github": {
+            type: "link",
+            url: "https://github.com/SaaketK/PINN"
+          }
+        }
+      },
+      "forge/": {
+        type: "dir",
+        children: {
+          "about": {
+            type: "file",
+            content:
+`# Forge — Agentic C Code Auditor
+
+Spring 2026.
+
+stack:
+  Python
+  LangGraph
+  Claude API
+  Docker
+  Streamlit
+
+what it is:
+  an asynchronous multi-agent pipeline that autonomously audits C codebases and generates verified patches, deployed through Streamlit Community Cloud.
+
+execution graph:
+  tree-sitter AST parsing
+    -> static analysis orchestration with cppcheck and clang-tidy
+    -> Claude API patch formulation
+    -> isolated Docker sandbox compilation
+
+frontend:
+  Streamlit interface for real-time audit visualization and patch review
+
+deployment:
+  containerized end-to-end for reproducible runs
+
+repo: github.com/SaaketK/Forge
+double-click \`github\` to open it.`
+          },
+          "github": {
+            type: "link",
+            url: "https://github.com/SaaketK/Forge"
           }
         }
       },
@@ -150,41 +241,6 @@ double-click \`github\` to open it.`
           }
         }
       },
-      "GDS webscraper/": {
-        type: "dir",
-        children: {
-          "about": {
-            type: "file",
-            content:
-`# python-gds-webscraper
-
-a python utility for retrieving NJIT highlander commons dining hall menus. also powers the GDS menu tool in the \`tools/\` folder.
-
-features:
-  - date flexibility: today, tomorrow, or a specific YYYY-MM-DD
-  - station targeting: focuses on the daily plate (all meals) and carved & crafted (lunch + dinner)
-  - automatic period_id resolution per meal
-
-how it works:
-  1. hits the /periods endpoint for the date to find the unique ID for the meal
-  2. uses the period_id + LOCATION_ID + date to pull the full menu JSON, then parses the requested categories
-
-inputs:
-  date  -> today | tomorrow | YYYY-MM-DD
-  meal  -> breakfast | lunch | dinner
-
-stack:
-  python + cloudscraper (cloudflare-aware HTTP wrapper around requests)
-
-repo: github.com/SaaketK/Python-GDS-Webscraper
-double-click \`github\` to open it.`
-          },
-          "github": {
-            type: "link",
-            url: "https://github.com/SaaketK/Python-GDS-Webscraper"
-          }
-        }
-      },
       "snaphealth/": {
         type: "dir",
         children: {
@@ -197,6 +253,14 @@ Anthropic Claude Builder Club Hackathon Spring 2026.
 
 developers: Roshan Tailor, Saaket Kulkarni, Frederick Rajakumar
 
+stack:
+  React 18
+  Vite
+  Tailwind CSS
+  FastAPI
+  Python
+  Claude API
+
 an AI-powered health literacy and triage tool for people without easy access to medical guidance.
 
 the problem:
@@ -204,6 +268,24 @@ the problem:
 
 the solution:
   users can describe symptoms in plain text, upload a photo of a wound or skin condition, or point their camera at a medication label and receive a clear, structured assessment in plain english. it doesn't replace a doctor — it helps people understand what they're looking at well enough to take the right next step.
+
+frontend:
+  built the full React/Vite mobile triage workflow
+  camera-based symptom capture
+  medication label upload
+  severity-driven result screens
+  follow-up chat UI
+
+image handling:
+  client-side canvas resizing
+  JPEG conversion
+  preview rendering
+  optimized upload payloads without server-side image storage
+
+api:
+  Claude multimodal vision integration
+  structured FastAPI REST endpoints
+  Pydantic v2 validation for symptom triage and medication label decoding
 
 live: snaphealth.vercel.app
 repo: github.com/RTailor2301/SnapHealth
@@ -651,12 +733,12 @@ function FileViewer({ name, content, onClose, offsetIndex = 0, zIndex = 200, onF
 // ============================================================
 // Desktop modal
 // ============================================================
-function Desktop({ onClose }) {
-  const [openFolder, setOpenFolder] = useState(null);
+function Desktop({ onClose, initialFolder = null }) {
+  const [openFolder, setOpenFolder] = useState(initialFolder);
   const [selectedIcon, setSelectedIcon] = useState(null);
   const [viewers, setViewers] = useState([]); // [{ id, name, content }]
   const [apps, setApps] = useState([]); // [{ id, app }]
-  const [windowOrder, setWindowOrder] = useState([]); // stacking: 'folder' | viewer id | `app-${id}`
+  const [windowOrder, setWindowOrder] = useState(() => initialFolder ? ['folder'] : []); // stacking: 'folder' | viewer id | `app-${id}`
   const viewerIdRef = useRef(0);
   const appIdRef = useRef(0);
   const focusWindow = (id) => setWindowOrder((o) => (o[o.length - 1] === id ? o : [...o.filter((x) => x !== id), id]));
@@ -760,7 +842,7 @@ function Desktop({ onClose }) {
           ))}
         </div>
 
-        <TerminalPanel ref={termRef} onClose={onClose} onOpenApp={openApp} />
+        <TerminalPanel ref={termRef} initialCwd={initialFolder || []} onClose={onClose} onOpenApp={openApp} />
       </div>
 
       {/* taskbar */}
@@ -897,8 +979,8 @@ function FileWindow({ path, onClose, onOpenFile, onOpenDir, zIndex = 200, onFocu
 // ============================================================
 // Terminal panel
 // ============================================================
-const TerminalPanel = React.forwardRef(function TerminalPanel({ onClose, onOpenApp }, ref) {
-  const [cwd, setCwd] = useState([]);
+const TerminalPanel = React.forwardRef(function TerminalPanel({ onClose, onOpenApp, initialCwd = [] }, ref) {
+  const [cwd, setCwd] = useState(initialCwd);
   const [history, setHistory] = useState(() => [
     { type: "boot", text: "RoomOS shell v0.3" },
     { type: "boot", text: "[ ok ] mounting fs" },
@@ -1093,18 +1175,18 @@ const TerminalPanel = React.forwardRef(function TerminalPanel({ onClose, onOpenA
           if (h.isDir) return <div className={cls} key={i}><span className="dir">{h.text}</span></div>;
           return <div className={cls} key={i}>{h.text || "\u00a0"}</div>;
         })}
-      </div>
-      <div className="term-prompt">
-        <span className="ps">{pathToString(cwd)} $</span>
-        <input
-          ref={inputRef}
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={onKeyDown}
-          spellCheck={false}
-          autoComplete="off"
-          autoCapitalize="off"
-        />
+        <div className="term-prompt">
+          <span className="ps">{pathToString(cwd)} $</span>
+          <input
+            ref={inputRef}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={onKeyDown}
+            spellCheck={false}
+            autoComplete="off"
+            autoCapitalize="off"
+          />
+        </div>
       </div>
     </div>
   );

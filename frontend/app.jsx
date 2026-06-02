@@ -26,7 +26,11 @@ function App() {
   const [simTime, setSimTime] = useState(() => new Date());
   const cycleAnchor = useRef({ real: Date.now(), sim: Date.now() });
   const [snoozedUntil, setSnoozedUntil] = useState(null);
-  const [terminalOpen, setTerminalOpen] = useState(false);
+  const initialOpen = useMemo(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("open");
+  }, []);
+  const [terminalOpen, setTerminalOpen] = useState(() => initialOpen === "projects");
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 5000);
     return () => clearInterval(id);
@@ -114,7 +118,7 @@ function App() {
           onMonitorClick={() => setTerminalOpen(true)}
         />
       </div>
-      {terminalOpen && <Terminal onClose={() => setTerminalOpen(false)} />}
+      {terminalOpen && <Terminal initialFolder={initialOpen === "projects" ? ["projects/"] : null} onClose={() => setTerminalOpen(false)} />}
       <TweaksPanel title="Tweaks">
         <TweakSection label="Scene">
           <TweakRadio

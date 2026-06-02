@@ -351,16 +351,28 @@ body {
 .term-body {
   flex: 1;
   background: #0b0f0a;
-  padding: 10px 14px 4px;
+  padding: 10px 0 0 14px;
   overflow-y: auto;
   color: #b6f0c1;
   font-size: 18px;
   line-height: 1.32;
   text-shadow: 0 0 5px rgba(92, 240, 138, 0.3);
+  scrollbar-color: #274827 #d4d0c8;
+  scrollbar-width: auto;
 }
-.term-body::-webkit-scrollbar { width: 10px; }
-.term-body::-webkit-scrollbar-track { background: #d4d0c8; }
-.term-body::-webkit-scrollbar-thumb { background: #888; border: 1px solid #1a1a1a; }
+.term-body::-webkit-scrollbar { width: 14px; }
+.term-body::-webkit-scrollbar-track {
+  background: #d4d0c8;
+  border-left: 2px solid #1a1a1a;
+  box-shadow: inset 2px 0 0 #ffffff, inset -2px 0 0 #88847c;
+}
+.term-body::-webkit-scrollbar-thumb {
+  background: #274827;
+  border: 2px solid #d4d0c8;
+  box-shadow: inset 1px 1px 0 #4f7a4f, inset -1px -1px 0 #0b1a0b;
+  min-height: 44px;
+}
+.term-body::-webkit-scrollbar-thumb:hover { background: #315c31; }
 
 .term-line { white-space: pre-wrap; word-break: break-word; }
 .term-line.cmd { color: #fff; }
@@ -373,7 +385,7 @@ body {
   align-items: baseline;
   gap: 6px;
   background: #0b0f0a;
-  padding: 4px 14px 12px;
+  padding: 4px 14px 12px 0;
   font-size: 18px;
   color: #b6f0c1;
 }
@@ -525,15 +537,28 @@ body {
 
 .term-body {
   flex: 1;
-  padding: 14px 16px 4px;
+  padding: 14px 0 0 16px;
   overflow-y: auto;
   color: #b6f0c1;
   font-size: 19px;
   line-height: 1.35;
   text-shadow: 0 0 6px rgba(92, 240, 138, 0.35);
+  scrollbar-color: #274827 #d4d0c8;
+  scrollbar-width: auto;
 }
-.term-body::-webkit-scrollbar { width: 8px; }
-.term-body::-webkit-scrollbar-thumb { background: #2c4a2c; }
+.term-body::-webkit-scrollbar { width: 14px; }
+.term-body::-webkit-scrollbar-track {
+  background: #d4d0c8;
+  border-left: 2px solid #1a1a1a;
+  box-shadow: inset 2px 0 0 #ffffff, inset -2px 0 0 #88847c;
+}
+.term-body::-webkit-scrollbar-thumb {
+  background: #274827;
+  border: 2px solid #d4d0c8;
+  box-shadow: inset 1px 1px 0 #4f7a4f, inset -1px -1px 0 #0b1a0b;
+  min-height: 44px;
+}
+.term-body::-webkit-scrollbar-thumb:hover { background: #315c31; }
 
 .term-line { white-space: pre-wrap; word-break: break-word; }
 .term-line.cmd { color: #fff; }
@@ -545,7 +570,7 @@ body {
   display: flex;
   align-items: baseline;
   gap: 6px;
-  padding: 4px 16px 14px;
+  padding: 4px 16px 14px 0;
   font-size: 19px;
   color: #b6f0c1;
 }

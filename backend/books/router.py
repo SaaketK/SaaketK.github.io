@@ -15,7 +15,6 @@ from recommender.vamana_filter import vamana_filter
 
 router = APIRouter()
 
-
 # User Book List
 
 @router.get("", response_model=list[BookOut])
