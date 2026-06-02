@@ -153,6 +153,32 @@ function shootingStar(t, w, h, night) {
   };
 }
 
+function cloudsForDay(dayKey) {
+  let seed = 0;
+  for (let i = 0; i < dayKey.length; i++) {
+    seed = (seed * 31 + dayKey.charCodeAt(i)) >>> 0;
+  }
+  const rand = () => {
+    seed = (seed * 1664525 + 1013904223) >>> 0;
+    return seed / 4294967296;
+  };
+  const sizes = [
+    { label: "Small", w1: 46, w2: 34, h1: 10, h2: 10 },
+    { label: "Med", w1: 64, w2: 46, h1: 12, h2: 12 },
+    { label: "Large", w1: 86, w2: 62, h1: 14, h2: 14 },
+  ];
+  const count = 3 + Math.floor(rand() * 2);
+  return Array.from({ length: count }, (_, i) => {
+    const size = sizes[Math.floor(rand() * sizes.length)];
+    return {
+      ...size,
+      yOff: Math.round(72 + rand() * 160),
+      period: 10 + rand() * 6,
+      phase: (rand() + i / count) % 1,
+    };
+  });
+}
+
 // ---------- window contents — FIXED mountains ----------
 function WindowView({ time, x, y, w, h }) {
   const t = time.getHours() + time.getMinutes()/60 + time.getSeconds()/3600;
@@ -160,6 +186,8 @@ function WindowView({ time, x, y, w, h }) {
   const sun = sunArc(t);
   const moon = moonArc(t);
   const night = nightAmount(t);
+  const dayKey = `${time.getFullYear()}-${time.getMonth()}-${time.getDate()}`;
+  const cloudDefs = useMemo(() => cloudsForDay(dayKey), [dayKey]);
 
   const arcX = (frac) => x - 70 + frac * (w + 100);
   const arcY = (frac) => y + 200 - Math.sin(Math.max(0, Math.min(1, frac)) * Math.PI) * 170;
@@ -354,12 +382,6 @@ function WindowView({ time, x, y, w, h }) {
 
       {/* clouds */}
       {(() => {
-        const cloudDefs = [
-          { yOff: 130, w1: 60, w2: 44, period: 10, phase: 0.10 },
-          { yOff: 200, w1: 80, w2: 56, period: 14, phase: 0.55 },
-          { yOff: 80,  w1: 50, w2: 36, period: 12, phase: 0.30 },
-          { yOff: 250, w1: 46, w2: 30, period: 16, phase: 0.75 },
-        ];
         const cloudOpacity = 0.85 - night * 0.75;
         if (cloudOpacity <= 0.05) return null;
         return (
@@ -370,8 +392,8 @@ function WindowView({ time, x, y, w, h }) {
               const cy = y + c.yOff;
               return (
                 <g key={i} fill="#fff">
-                  <rect x={cx} y={cy} width={c.w1} height="12" />
-                  <rect x={cx + 8} y={cy - 8} width={c.w2} height="12" />
+                  <rect x={cx} y={cy} width={c.w1} height={c.h1} />
+                  <rect x={cx + 8} y={cy - c.h2 + 4} width={c.w2} height={c.h2} />
                 </g>
               );
             })}
