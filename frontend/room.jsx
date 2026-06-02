@@ -100,6 +100,9 @@ function _mix(c1, c2, f) {
   return `rgb(${r},${g},${bl})`;
 }
 function skyAt(t) {
+  if (t >= 0 && t < 3) {
+    return { top: "#030817", mid: "#050d1f", bot: "#050d1f" };
+  }
   // t = hours float 0..24. Returns {top, mid, bot} colors.
   const stops = [
     [0,    ["#050a1c", "#08122a", "#0a1730"]], // deep night
@@ -155,25 +158,31 @@ function nightAmount(t) {
 }
 
 function shootingStar(t, w, h, night) {
-  // Shooting stars only happen between 11 PM and 3 AM.
+  // Shooting stars only happen between midnight and 3 AM.
   const hour = ((t % 24) + 24) % 24;
-  if (!(hour >= 23 || hour < 3)) return null;
+  if (!(hour >= 0 && hour < 3)) return null;
   if (night < 0.4) return null;
-  // One streak every 5 sim-minutes (1/12 hour), but visible only for a brief flash.
-  const slot = Math.floor(t * 12);
-  const phase = (t * 12) - slot; // 0..1 of the 5-minute slot
-  const VIS = 0.025; // ~7.5 sim-seconds of streak per slot
-  if (phase > VIS) return null;
+
+  const totalSeconds = Math.floor(hour * 3600);
+  const slot = Math.floor(totalSeconds / 300);
+  const secondsIntoSlot = totalSeconds % 300;
   const rand = (s) => { const v = Math.sin(s * 9301 + 49297) * 233280; return v - Math.floor(v); };
-  const startX = 20 + rand(slot) * (w - 160);
-  const startY = 20 + rand(slot + 7) * (h * 0.45);
-  const dx = 140 + rand(slot + 13) * 120;
-  const dy = 80 + rand(slot + 19) * 60;
-  const p = phase / VIS;
+  const activeStart = Math.floor(rand(slot + 23) * 260);
+  const activeDuration = 12;
+  if (secondsIntoSlot < activeStart || secondsIntoSlot > activeStart + activeDuration) return null;
+
+  const startX = -70 + rand(slot) * (w * 0.45);
+  const startY = 20 + rand(slot + 7) * (h * 0.38);
+  const dx = 260 + rand(slot + 13) * 120;
+  const dy = 95 + rand(slot + 19) * 70;
   return {
-    x1: startX, y1: startY,
-    x2: startX + dx * p, y2: startY + dy * p,
-    opacity: Math.sin(p * Math.PI) * Math.min(1, (night - 0.4) / 0.4),
+    slot,
+    startX, startY,
+    endX: startX + dx,
+    endY: startY + dy,
+    tailX: -(85 + rand(slot + 31) * 35),
+    tailY: -(28 + rand(slot + 37) * 18),
+    opacity: Math.min(1, (night - 0.4) / 0.4),
   };
 }
 
@@ -203,6 +212,31 @@ function WindowView({ time, x, y, w, h }) {
       <rect x={x} y={y} width={w} height={Math.round(h*0.66)} fill={sky.mid} />
       <rect x={x} y={y} width={w} height={Math.round(h*0.33)} fill={sky.top} />
 
+      {/* background mountains, rendered before the moving sky elements and night dimming */}
+      {(() => {
+        const mountainBase = y + h - 44;
+        const farFill = _mix("#657885", "#13243a", night);
+        const nearFill = _mix("#4e6672", "#102036", night);
+        const snowFill = _mix("#dce8ed", "#25334a", night);
+        const mountainOpacity = 0.76 - night * 0.38;
+        return (
+          <g className="window-mountains" clipPath={`url(#${clipId})`} opacity={mountainOpacity}>
+            <polygon
+              points={`${x - 30},${mountainBase} ${x + 60},${y + h - 118} ${x + 128},${mountainBase} ${x + 220},${y + h - 130} ${x + 330},${mountainBase} ${x + 430},${y + h - 112} ${x + w + 40},${mountainBase}`}
+              fill={farFill}
+            />
+            <polygon
+              points={`${x - 20},${mountainBase + 16} ${x + 96},${y + h - 96} ${x + 190},${mountainBase + 16} ${x + 285},${y + h - 122} ${x + 390},${mountainBase + 16} ${x + 510},${y + h - 104} ${x + w + 30},${mountainBase + 16}`}
+              fill={nearFill}
+            />
+            <polygon points={`${x + 60},${y + h - 118} ${x + 78},${y + h - 96} ${x + 48},${y + h - 96}`} fill={snowFill} opacity="0.62" />
+            <polygon points={`${x + 220},${y + h - 130} ${x + 242},${y + h - 102} ${x + 200},${y + h - 104}`} fill={snowFill} opacity="0.55" />
+            <polygon points={`${x + 285},${y + h - 122} ${x + 306},${y + h - 96} ${x + 266},${y + h - 98}`} fill={snowFill} opacity="0.6" />
+            <polygon points={`${x + 430},${y + h - 112} ${x + 448},${y + h - 91} ${x + 414},${y + h - 92}`} fill={snowFill} opacity="0.5" />
+          </g>
+        );
+      })()}
+
       {/* stars (visible at night, fade with night amount) */}
       {night > 0.15 && [
         [40, 30], [80, 80], [140, 50], [200, 110], [240, 40],
@@ -210,21 +244,40 @@ function WindowView({ time, x, y, w, h }) {
         [380, 200], [50, 240], [220, 260], [320, 230], [120, 130],
         [260, 70], [400, 50], [100, 280], [350, 280], [430, 170],
         [410, 240], [160, 290], [70, 320], [280, 310], [400, 320],
-      ].filter(([dx, dy]) => dx < w - 8 && dy < h - 60).map(([dx, dy], i) => {
+      ].filter(([dx, dy]) => dx < w - 8 && dy < 245).map(([dx, dy], i) => {
         const cls = "star" + (i % 4 === 0 ? "" : i % 4 === 1 ? " s2" : i % 4 === 2 ? " s3" : " s4");
         const sz = i % 5 === 0 ? 4 : 3;
         return <rect key={i} className={cls} x={x + dx} y={y + dy} width={sz} height={sz} fill="#fff" opacity={Math.min(1, (night - 0.15) / 0.7)} />;
       })}
 
-      {/* shooting star — one every 5 sim minutes at night */}
+      {/* shooting star — brief animated streak at night */}
       {(() => {
         const s = shootingStar(t, w, h, night);
         if (!s) return null;
         return (
           <g clipPath={`url(#${clipId})`} opacity={s.opacity}>
-            <line x1={x + s.x1} y1={y + s.y1} x2={x + s.x2} y2={y + s.y2} stroke="#fff" strokeWidth="2" opacity="0.85" />
-            <line x1={x + s.x1} y1={y + s.y1} x2={x + (s.x1 + s.x2)/2} y2={y + (s.y1 + s.y2)/2} stroke="#cfe8ff" strokeWidth="4" opacity="0.35" />
-            <rect x={x + s.x2 - 2} y={y + s.y2 - 2} width="4" height="4" fill="#fff" style={{ filter: "drop-shadow(0 0 6px #cfe8ff) drop-shadow(0 0 12px #cfe8ff)" }} />
+            <g key={s.slot} className="shooting-star" opacity="0" transform={`translate(${x + s.startX} ${y + s.startY})`}>
+              <animateTransform
+                attributeName="transform"
+                type="translate"
+                values={`${x + s.startX} ${y + s.startY}; ${x + s.endX} ${y + s.endY}; ${x + s.endX} ${y + s.endY}`}
+                keyTimes="0;0.85;1"
+                dur="12s"
+                begin="0s"
+                fill="freeze"
+              />
+              <animate
+                attributeName="opacity"
+                values="0;1;0.9;0.65;0;0"
+                keyTimes="0;0.1;0.45;0.72;0.92;1"
+                dur="12s"
+                begin="0s"
+                fill="freeze"
+              />
+              <line x1={s.tailX} y1={s.tailY} x2="0" y2="0" stroke="#dceeff" strokeWidth="5" opacity="0.28" strokeLinecap="round" />
+              <line x1={s.tailX * 0.7} y1={s.tailY * 0.7} x2="0" y2="0" stroke="#ffffff" strokeWidth="2" opacity="0.9" strokeLinecap="round" />
+              <rect x="-2" y="-2" width="4" height="4" fill="#fff" style={{ filter: "drop-shadow(0 0 4px #ffffff) drop-shadow(0 0 9px #cfe8ff)" }} />
+            </g>
           </g>
         );
       })()}
@@ -232,12 +285,13 @@ function WindowView({ time, x, y, w, h }) {
       {/* moon */}
       {moon && (() => {
         const mx = arcX(moon.frac), my = arcY(moon.frac);
+        const moonCutoutFill = my < y + h * 0.33 ? sky.top : my < y + h * 0.66 ? sky.mid : sky.bot;
         return (
-          <g clipPath={`url(#${clipId})`}>
-            <rect x={mx} y={my} width="40" height="40" fill="#f0e6c0" />
-            <rect x={mx - 6} y={my + 6} width="48" height="28" fill="#f0e6c0" />
-            <rect x={mx + 6} y={my - 6} width="28" height="52" fill="#f0e6c0" />
-            <rect x={mx + 16} y={my} width="24" height="40" fill={sky.top} />
+          <g clipPath={`url(#${clipId})`} style={{ filter: "drop-shadow(0 0 8px #fff4c8)" }}>
+            <rect x={mx} y={my} width="40" height="40" fill="#fff3c8" />
+            <rect x={mx - 6} y={my + 6} width="48" height="28" fill="#fff3c8" />
+            <rect x={mx + 6} y={my - 6} width="28" height="52" fill="#fff3c8" />
+            <rect x={mx + 16} y={my} width="24" height="40" fill={moonCutoutFill} />
           </g>
         );
       })()}
@@ -286,23 +340,6 @@ function WindowView({ time, x, y, w, h }) {
         );
       })()}
 
-      {/* distant city silhouette (always present, darker at night) */}
-      <rect x={x} y={y + h - 50} width={w} height="50" fill={night > 0.5 ? "#0a1020" : "#3a5a3a"} />
-      <rect x={x + 60} y={y + h - 80} width="40" height="30" fill={night > 0.5 ? "#0e1a30" : "#2a4a2a"} />
-      <rect x={x + 110} y={y + h - 100} width="30" height="50" fill={night > 0.5 ? "#0e1a30" : "#2a4a2a"} />
-      <rect x={x + 150} y={y + h - 75} width="60" height="25" fill={night > 0.5 ? "#0e1a30" : "#2a4a2a"} />
-      <rect x={x + 220} y={y + h - 90} width="36" height="40" fill={night > 0.5 ? "#0e1a30" : "#2a4a2a"} />
-      <rect x={x + 280} y={y + h - 70} width="50" height="20" fill={night > 0.5 ? "#0e1a30" : "#2a4a2a"} />
-      <rect x={x + 340} y={y + h - 95} width="44" height="45" fill={night > 0.5 ? "#0e1a30" : "#2a4a2a"} />
-      {/* lit city windows fade in at night */}
-      {night > 0.3 && (
-        <g opacity={Math.min(1, (night - 0.3) / 0.5)}>
-          <rect x={x + 124} y={y + h - 88} width="3" height="3" fill="#ffd966" />
-          <rect x={x + 130} y={y + h - 80} width="3" height="3" fill="#ffd966" />
-          <rect x={x + 232} y={y + h - 78} width="3" height="3" fill="#ffd966" />
-          <rect x={x + 354} y={y + h - 80} width="3" height="3" fill="#ffd966" />
-        </g>
-      )}
     </g>
   );
 }
@@ -437,6 +474,10 @@ function Room({ scene, time, lampOn, monitorOn, snoozed, onPhoneClick, onMonitor
           <rect x="0" y="59" width="120" height="1" fill="#000" opacity="0.06" />
           <rect x="0" y="0" width="1" height="60" fill="#000" opacity="0.05" />
         </pattern>
+        <mask id="roomDarknessMask">
+          <rect x="0" y="0" width="1800" height="1000" fill="#fff" />
+          <rect x={winX} y={winY} width={winW} height={winH} fill="#000" />
+        </mask>
       </defs>
 
       {/* ===== WALL ===== */}
@@ -673,9 +714,14 @@ function Room({ scene, time, lampOn, monitorOn, snoozed, onPhoneClick, onMonitor
           forces a fixed darkness — the room dims/brightens with the sky. */}
       {(() => {
         const tHr = time.getHours() + time.getMinutes()/60 + time.getSeconds()/3600;
-        const overlayOpacity = nightAmount(tHr) * 0.55;
+        const night = nightAmount(tHr);
+        const overlayOpacity = night * 0.8;
+        const windowDimOpacity = night * 0.28;
         return (
-          <rect x="0" y="0" width="1800" height="1000" fill="#0a1c36" opacity={overlayOpacity} style={{ mixBlendMode: "multiply", pointerEvents: "none" }} />
+          <>
+            <rect x="0" y="0" width="1800" height="1000" fill="#0a1c36" opacity={overlayOpacity} mask="url(#roomDarknessMask)" style={{ mixBlendMode: "multiply", pointerEvents: "none" }} />
+            <rect x={winX} y={winY} width={winW} height={winH} fill="#07142a" opacity={windowDimOpacity} style={{ mixBlendMode: "multiply", pointerEvents: "none" }} />
+          </>
         );
       })()}
       {isAlarm && <rect x="0" y="0" width="1800" height="1000" fill="#ffb084" opacity="0.07" style={{ mixBlendMode: "screen", pointerEvents: "none" }} />}
@@ -690,6 +736,31 @@ function Room({ scene, time, lampOn, monitorOn, snoozed, onPhoneClick, onMonitor
         </g>
       )}
 
+      {/* Redraw the monitor screen after the darkness pass so it stays luminous. */}
+      {(() => {
+        const tHr = time.getHours() + time.getMinutes()/60 + time.getSeconds()/3600;
+        const night = nightAmount(tHr);
+        return (
+          <g pointerEvents="none" transform="translate(-8 0)">
+            <rect
+              x="1322"
+              y="254"
+              width="292"
+              height="142"
+              fill="#75d8f0"
+              opacity={0.04 + night * 0.1}
+              style={{ mixBlendMode: "screen", filter: "drop-shadow(0 0 10px #7ee8ff) drop-shadow(0 0 20px #5bbfff)" }}
+            />
+            {night > 0.05 && (
+              <g opacity={0.35 + night * 0.39}>
+                <rect x="1328" y="260" width="280" height="130" fill="#1a1b1e" />
+                <MiniDesktop time={time} />
+              </g>
+            )}
+          </g>
+        );
+      })()}
+
       {monitorOn && (
         <g style={{ mixBlendMode: "screen", pointerEvents: "none" }}>
           <ellipse cx="1470" cy="446" rx="300" ry="240" fill="url(#monGlow)" opacity="0.85" />
@@ -698,7 +769,7 @@ function Room({ scene, time, lampOn, monitorOn, snoozed, onPhoneClick, onMonitor
 
       {/* ===== MONITOR GLOW (Always On) ===== */}
       <g style={{ mixBlendMode: "screen", pointerEvents: "none" }}>
-        <ellipse cx="1470" cy="446" rx="300" ry="240" fill="url(#monGlow)" opacity="0.85" />
+        <ellipse cx="1470" cy="446" rx="300" ry="240" fill="url(#monGlow)" opacity={0.85 - nightAmount(time.getHours() + time.getMinutes()/60 + time.getSeconds()/3600) * 0.45} />
       </g>
 
       {/* Chair + Worker rendered AFTER the monitor glow so the seat sits on top of the light.
@@ -852,4 +923,3 @@ function BookRow({ y, idx }) {
 }
 
 window.Room = Room;
-

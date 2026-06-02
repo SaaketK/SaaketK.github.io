@@ -36,7 +36,7 @@ const FS = {
   "about_me": {
     type: "file",
     content:
-`hi — i'm Saaket.
+`hi — I'm Saaket.
 
 CS major at NJIT. double minor in computer engineering & computational mathematics.
 
@@ -44,7 +44,7 @@ current work:
   researching ANNS algorithm performance on Intel AMX CPUs and high-performance GPU clusters. (summer 2026)
 
 past work:
-  software engineering intern at Cardaverse. web development frameworks & full-stack engineering.
+  software engineering intern at Cardaverse. web development frameworks & full-stack engineering. (summer 2025)
 
 interests:
   - computer architecture
@@ -192,7 +192,7 @@ what it is:
   an asynchronous multi-agent pipeline that autonomously audits C codebases and generates verified patches, deployed through Streamlit Community Cloud.
 
 execution graph:
-  tree-sitter AST parsing
+  tree-sitter Abstract Syntax Tree parsing
     -> static analysis orchestration with cppcheck and clang-tidy
     -> Claude API patch formulation
     -> isolated Docker sandbox compilation
@@ -922,7 +922,7 @@ function FileWindow({ path, onClose, onOpenFile, onOpenDir, zIndex = 200, onFocu
   const offsetTop = 80 + (path.length * 26);
   const offsetLeft = 280 + (path.length * 26);
   const [pos, onHeaderMouseDown] = useDraggable({ top: offsetTop, left: offsetLeft });
-  const [size, setSize] = useState({ width: 460, height: 300 });
+  const [size, setSize] = useState({ width: 540, height: 340 });
   const startResize = (e) => {
     if (e.button !== 0) return;
     e.preventDefault(); e.stopPropagation();
