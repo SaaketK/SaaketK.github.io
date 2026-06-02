@@ -432,6 +432,7 @@ function Room({ scene, time, lampOn, monitorOn, snoozed, onPhoneClick, onMonitor
   };
 
   const winX = 600, winY = 90, winW = 480, winH = 380;
+  const windowFrameFill = "#1b1009";
 
   return (
     <svg className="room-svg" viewBox="0 0 1800 868" preserveAspectRatio="xMidYMid meet">
@@ -476,7 +477,7 @@ function Room({ scene, time, lampOn, monitorOn, snoozed, onPhoneClick, onMonitor
         </pattern>
         <mask id="roomDarknessMask">
           <rect x="0" y="0" width="1800" height="1000" fill="#fff" />
-          <rect x={winX} y={winY} width={winW} height={winH} fill="#000" />
+          <rect x={winX - 16} y={winY - 16} width={winW + 32} height={winH + 16} fill="#000" />
         </mask>
       </defs>
 
@@ -597,14 +598,14 @@ function Room({ scene, time, lampOn, monitorOn, snoozed, onPhoneClick, onMonitor
 
       {/* ===== WINDOW ===== */}
       <g>
-        <rect x={winX - 16} y={winY - 16} width={winW + 32} height={winH + 32} fill="#3a2614" />
-        <rect x={winX} y={winY} width={winW} height={winH} fill="#1a0e08" />
+        <rect x={winX - 16} y={winY - 16} width={winW + 32} height={winH + 32} fill={windowFrameFill} />
+        <rect x={winX} y={winY} width={winW} height={winH} fill={windowFrameFill} />
         <rect x={winX - 22} y={winY + winH} width={winW + 44} height="18" fill="#3a2614" />
         <rect x={winX - 22} y={winY + winH + 16} width={winW + 44} height="6" fill="#2a1810" />
         <WindowView time={time} x={winX} y={winY} w={winW} h={winH} />
-        <rect x={winX + winW / 3 - 3} y={winY} width="6" height={winH} fill="#3a2614" />
-        <rect x={winX + (2 * winW) / 3 - 3} y={winY} width="6" height={winH} fill="#3a2614" />
-        <rect x={winX} y={winY + winH / 2 - 3} width={winW} height="6" fill="#3a2614" />
+        <rect x={winX + winW / 3 - 3} y={winY} width="6" height={winH} fill={windowFrameFill} />
+        <rect x={winX + (2 * winW) / 3 - 3} y={winY} width="6" height={winH} fill={windowFrameFill} />
+        <rect x={winX} y={winY + winH / 2 - 3} width={winW} height="6" fill={windowFrameFill} />
         <rect x={winX - 36} y={winY - 26} width={winW + 72} height="6" fill="#5a3a22" />
         <rect x={winX - 40} y={winY - 30} width="10" height="14" fill="#5a3a22" />
         <rect x={winX + winW + 30} y={winY - 30} width="10" height="14" fill="#5a3a22" />
@@ -720,7 +721,7 @@ function Room({ scene, time, lampOn, monitorOn, snoozed, onPhoneClick, onMonitor
         return (
           <>
             <rect x="0" y="0" width="1800" height="1000" fill="#0a1c36" opacity={overlayOpacity} mask="url(#roomDarknessMask)" style={{ mixBlendMode: "multiply", pointerEvents: "none" }} />
-            <rect x={winX} y={winY} width={winW} height={winH} fill="#07142a" opacity={windowDimOpacity} style={{ mixBlendMode: "multiply", pointerEvents: "none" }} />
+            <rect x={winX - 16} y={winY - 16} width={winW + 32} height={winH + 16} fill="#07142a" opacity={windowDimOpacity} style={{ mixBlendMode: "multiply", pointerEvents: "none" }} />
           </>
         );
       })()}
