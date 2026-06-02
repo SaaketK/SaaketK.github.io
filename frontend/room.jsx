@@ -11,23 +11,16 @@ const { useMemo } = React;
 // -- character --
 function Sleeper({ visible }) {
   if (!visible) return null;
-  // Simple dome-shaped head poking out from under the covers,
-  // black hair cap on top.
   return (
     <g className="breath">
-      {/* face / back of head */}
       <rect x="68" y="540" width="56" height="34" fill="#b07d5e" />
       <rect x="64" y="546" width="4"  height="22" fill="#b07d5e" />
       <rect x="124" y="546" width="4" height="22" fill="#b07d5e" />
-      {/* black hair cap — only covers the left side of the top now */}
       <rect x="68" y="540" width="30" height="14" fill="#0e0a08" />
       <rect x="72" y="536" width="22" height="4"  fill="#0e0a08" />
-      {/* extended hair down the left side of the head */}
       <rect x="58" y="546" width="10" height="22" fill="#0e0a08" />
       <rect x="62" y="540" width="6"  height="6"  fill="#0e0a08" />
-      {/* small closed eye */}
       <rect x="92" y="560" width="8" height="2" fill="#0e0a08" />
-      {/* small mouth */}
       <rect x="94" y="568" width="6" height="2" fill="#3a1818" />
       <text className="sleep-z z1" x="110" y="515" fontFamily="'Press Start 2P', monospace" fontSize="14" fill="#fff">z</text>
       <text className="sleep-z z2" x="110" y="515" fontFamily="'Press Start 2P', monospace" fontSize="14" fill="#fff">z</text>
@@ -35,12 +28,9 @@ function Sleeper({ visible }) {
   );
 }
 
-// Chair is always visible regardless of scene; lives in its own component
-// so the seat persists when the worker is away.
 function Chair() {
   return (
     <g transform="translate(-19 -106)">
-      {/* chair back */}
       <rect x="1404" y="508" width="100" height="170" fill="#2a2118" />
       <rect x="1404" y="508" width="100" height="6" fill="#3a2e22" />
       <rect x="1398" y="638" width="112" height="14" fill="#1a140e" />
@@ -52,29 +42,20 @@ function Chair() {
 
 function Worker({ visible }) {
   if (!visible) return null;
-  // head is exactly centered to the monitor
   return (
     <g transform="translate(-19 -106)">
-      {/* body (hoodie) — narrowed to fit within the chair back */}
       <rect x="1406" y="528" width="96" height="120" fill="#2f4d6e" />
       <rect x="1406" y="528" width="96" height="8" fill="#1f3a55" />
       <rect x="1406" y="640" width="96" height="8" fill="#1f3a55" />
-      {/* neck — ~1/2 head width, centered */}
       <rect x="1442" y="500" width="24" height="28" fill="#8a5a38" />
       <rect x="1442" y="500" width="24" height="3" fill="#6a4228" />
-      {/* back of head — black hair down to the ear-bottom line */}
       <rect x="1429" y="440" width="50" height="44" fill="#0e0a08" />
-      {/* exposed skin below the main hairline */}
       <rect x="1429" y="484" width="50" height="16" fill="#8a5a38" />
-      {/* centered tuft below the ears — 2/3 width of the hair above */}
       <rect x="1437" y="484" width="34" height="9" fill="#0e0a08" />
-      {/* hair extending past the sides, above and below the ears */}
       <rect x="1421" y="450" width="8" height="18" fill="#0e0a08" />
       <rect x="1479" y="450" width="8" height="18" fill="#0e0a08" />
-      {/* ears — skin, poking through gaps in the side hair */}
       <rect x="1423" y="468" width="6" height="10" fill="#8a5a38" />
       <rect x="1479" y="468" width="6" height="10" fill="#8a5a38" />
-      {/* hands on keys — animated up/down (rendered first so sleeves cover them) */}
       <g className="typing-arm-l">
         <rect x="1350" y="546" width="22" height="16" fill="#8a5a38" />
         <rect x="1350" y="546" width="22" height="3" fill="#6a4228" />
@@ -83,7 +64,6 @@ function Worker({ visible }) {
         <rect x="1536" y="546" width="22" height="16" fill="#8a5a38" />
         <rect x="1536" y="546" width="22" height="3" fill="#6a4228" />
       </g>
-      {/* sleeves (arms) — rendered after hands so they overlap from behind */}
       <rect x="1366" y="544" width="40" height="20" fill="#2f4d6e" />
       <rect x="1502" y="544" width="40" height="20" fill="#2f4d6e" />
     </g>
@@ -103,18 +83,17 @@ function skyAt(t) {
   if (t >= 0 && t < 3) {
     return { top: "#030817", mid: "#050d1f", bot: "#050d1f" };
   }
-  // t = hours float 0..24. Returns {top, mid, bot} colors.
   const stops = [
-    [0,    ["#050a1c", "#08122a", "#0a1730"]], // deep night
-    [4.5,  ["#0a1a3a", "#1a2a4c", "#2a2a48"]], // pre-dawn (sky getting lighter at horizon)
-    [5.5,  ["#2a2350", "#5a3a6a", "#a06a70"]], // dawn purple/pink
-    [6.5,  ["#ff8a5c", "#ffb47a", "#ffd9a8"]], // sunrise orange
-    [7.5,  ["#8fc6e5", "#bbe0f0", "#dceef5"]], // morning
-    [12,   ["#5fb6e8", "#8fcaea", "#bee7f5"]], // midday
-    [16.5, ["#7fc0e0", "#cfe0ea", "#ffd6a8"]], // afternoon -> golden
-    [18.5, ["#ff7a5c", "#ff9a6a", "#ffc890"]], // sunset orange
-    [19.5, ["#4a3270", "#8a4a72", "#c06a78"]], // dusk purple/pink
-    [20.5, ["#1a2150", "#1a2348", "#2a2a4a"]], // nightfall
+    [0,    ["#050a1c", "#08122a", "#0a1730"]],
+    [4.5,  ["#0a1a3a", "#1a2a4c", "#2a2a48"]],
+    [5.5,  ["#2a2350", "#5a3a6a", "#a06a70"]],
+    [6.5,  ["#ff8a5c", "#ffb47a", "#ffd9a8"]],
+    [7.5,  ["#8fc6e5", "#bbe0f0", "#dceef5"]],
+    [12,   ["#5fb6e8", "#8fcaea", "#bee7f5"]],
+    [16.5, ["#7fc0e0", "#cfe0ea", "#ffd6a8"]],
+    [18.5, ["#ff7a5c", "#ff9a6a", "#ffc890"]],
+    [19.5, ["#4a3270", "#8a4a72", "#c06a78"]],
+    [20.5, ["#1a2150", "#1a2348", "#2a2a4a"]],
     [22,   ["#0a1340", "#0a1730", "#0e1a36"]],
     [24,   ["#050a1c", "#08122a", "#0a1730"]],
   ];
@@ -132,14 +111,11 @@ function skyAt(t) {
   return { top: stops[0][1][0], mid: stops[0][1][1], bot: stops[0][1][2] };
 }
 function sunArc(t) {
-  // Sun's full trajectory spans 4.5..20.5 (16h), with edges offscreen.
-  // Visible window roughly 5..20.
   if (t < 4.5 || t > 20.5) return null;
   const frac = (t - 4.5) / 16;
   return { frac };
 }
 function moonArc(t) {
-  // Moon's full trajectory spans 18..7 (next day), 13h.
   let frac;
   if (t >= 18) frac = (t - 18) / 13;
   else if (t <= 7) frac = (t + 6) / 13;
@@ -147,22 +123,18 @@ function moonArc(t) {
   return { frac };
 }
 function nightAmount(t) {
-  // 1 = fully dark, 0 = fully bright. Smooth transitions at dawn/dusk.
-  // Easing: morning brightens slowly until ~8 AM, then steady through the day.
-  const ease = (x) => x * x * (3 - 2 * x); // smoothstep
+  const ease = (x) => x * x * (3 - 2 * x);
   if (t <= 4.5) return 1;
-  if (t < 8.0) return 1 - ease((t - 4.5) / 3.5);   // 4.5..8 -> 1..0 (eased)
+  if (t < 8.0) return 1 - ease((t - 4.5) / 3.5);
   if (t <= 18) return 0;
-  if (t < 20.5) return ease((t - 18) / 2.5);        // 18..20.5 -> 0..1
+  if (t < 20.5) return ease((t - 18) / 2.5);
   return 1;
 }
 
 function shootingStar(t, w, h, night) {
-  // Shooting stars only happen between midnight and 3 AM.
   const hour = ((t % 24) + 24) % 24;
   if (!(hour >= 0 && hour < 3)) return null;
   if (night < 0.4) return null;
-
   const totalSeconds = Math.floor(hour * 3600);
   const slot = Math.floor(totalSeconds / 300);
   const secondsIntoSlot = totalSeconds % 300;
@@ -170,23 +142,18 @@ function shootingStar(t, w, h, night) {
   const activeStart = Math.floor(rand(slot + 23) * 260);
   const activeDuration = 12;
   if (secondsIntoSlot < activeStart || secondsIntoSlot > activeStart + activeDuration) return null;
-
   const startX = -70 + rand(slot) * (w * 0.45);
   const startY = 20 + rand(slot + 7) * (h * 0.38);
   const dx = 260 + rand(slot + 13) * 120;
   const dy = 95 + rand(slot + 19) * 70;
   return {
-    slot,
-    startX, startY,
-    endX: startX + dx,
-    endY: startY + dy,
-    tailX: -(85 + rand(slot + 31) * 35),
-    tailY: -(28 + rand(slot + 37) * 18),
+    slot, startX, startY, endX: startX + dx, endY: startY + dy,
+    tailX: -(85 + rand(slot + 31) * 35), tailY: -(28 + rand(slot + 37) * 18),
     opacity: Math.min(1, (night - 0.4) / 0.4),
   };
 }
 
-// ---------- window contents ----------
+// ---------- window contents — FIXED mountains ----------
 function WindowView({ time, x, y, w, h }) {
   const t = time.getHours() + time.getMinutes()/60 + time.getSeconds()/3600;
   const sky = skyAt(t);
@@ -194,11 +161,13 @@ function WindowView({ time, x, y, w, h }) {
   const moon = moonArc(t);
   const night = nightAmount(t);
 
-  // Sun/moon positions: parabolic arc that extends beyond the window frame on both sides,
-  // so the bodies slide on from the left and off to the right.
   const arcX = (frac) => x - 70 + frac * (w + 100);
   const arcY = (frac) => y + 200 - Math.sin(Math.max(0, Math.min(1, frac)) * Math.PI) * 170;
   const clipId = `winclip-${x}-${y}-${w}-${h}`;
+
+  // ridgeBase: the "ground horizon" line
+  const ridgeBase = y + h - 74;
+  const grassY    = y + h - 46;
 
   return (
     <g>
@@ -207,37 +176,120 @@ function WindowView({ time, x, y, w, h }) {
           <rect x={x} y={y} width={w} height={h} />
         </clipPath>
       </defs>
-      {/* sky gradient via stacked rects */}
+
+      {/* sky gradient */}
       <rect x={x} y={y} width={w} height={h} fill={sky.bot} />
       <rect x={x} y={y} width={w} height={Math.round(h*0.66)} fill={sky.mid} />
       <rect x={x} y={y} width={w} height={Math.round(h*0.33)} fill={sky.top} />
 
-      {/* background mountains, rendered before the moving sky elements and night dimming */}
+      {/* ═══════════════════════════════════════════
+          MOUNTAINS — fully redrawn
+          • bg peaks defined with exact apex coords
+          • snow caps are isoceles triangles centered on each apex
+          • foreground polygon valleys sit at ridgeBase (not below)
+            and the polygon bottom extends to y+h — no sky gaps possible
+          ═══════════════════════════════════════════ */}
       {(() => {
-        const mountainBase = y + h - 44;
-        const farFill = _mix("#657885", "#13243a", night);
-        const nearFill = _mix("#4e6672", "#102036", night);
-        const snowFill = _mix("#dce8ed", "#25334a", night);
-        const mountainOpacity = 0.76 - night * 0.38;
+        const backFill   = _mix("#8fa6ae", "#1b2d43", night);
+        const backDark   = _mix("#5a7480", "#0e1c2c", night);
+        const frontFill  = _mix("#4e6e76", "#0e1e28", night);
+        const frontDark  = _mix("#324e58", "#08141c", night);
+        const snowFill   = _mix("#e8f0f2", "#3b4d64", night);
+        const forestFill = _mix("#1e3828", "#060f0a", night);
+        const grassFill  = _mix("#4a7040", "#0e1e14", night);
+        const grassTop   = _mix("#62904e", "#172b1c", night);
+        const landscapeOpacity = 0.94 - night * 0.26;
+
+        // ── Background peak definitions: [xOffset, height above ridgeBase] ──
+        // 5 peaks with smooth connecting shoulders
+        const bgPts = [
+          [x - 30,      ridgeBase          ],  // left ground
+          [x + 46,      ridgeBase - 72     ],  // bg peak A
+          [x + 100,     ridgeBase - 38     ],  // shoulder
+          [x + 160,     ridgeBase - 108    ],  // bg peak B (tall)
+          [x + 228,     ridgeBase - 22     ],  // valley
+          [x + 292,     ridgeBase - 144    ],  // bg peak C (tallest)
+          [x + 354,     ridgeBase - 56     ],  // shoulder
+          [x + 426,     ridgeBase - 96     ],  // bg peak D
+          [x + w + 50,  ridgeBase          ],  // right ground
+        ];
+        const bgPoints = bgPts.map(([px,py]) => `${px},${py}`).join(" ");
+
+        // ── Foreground peak definitions ──
+        // Valleys exactly at ridgeBase so background base is fully sealed.
+        // Bottom edge at y+h guarantees zero sky gaps.
+        const fgPts = [
+          [x - 30,      ridgeBase          ],  // left at ridgeBase
+          [x + 78,      ridgeBase - 62     ],  // fg peak A
+          [x + 188,     ridgeBase          ],  // valley — exactly at ridgeBase
+          [x + 308,     ridgeBase - 78     ],  // fg peak B
+          [x + 420,     ridgeBase          ],  // valley — exactly at ridgeBase
+          [x + w + 40,  ridgeBase - 60     ],  // fg peak C (partially off-right)
+          [x + w + 40,  y + h              ],  // seal bottom-right
+          [x - 30,      y + h              ],  // seal bottom-left
+        ];
+        const fgPoints = fgPts.map(([px,py]) => `${px},${py}`).join(" ");
+
+        const pt = ([x1, y1], [x2, y2], t) => [
+          x1 + (x2 - x1) * t,
+          y1 + (y2 - y1) * t,
+        ];
+        const SnowCap = ({ peak, left, right, leftT, rightT, op = 0.9 }) => {
+          const [rx, ry] = pt(peak, right, rightT);
+          const [lx, ly] = pt(peak, left, leftT);
+          return (
+            <polygon
+              points={`${peak[0]},${peak[1]} ${rx},${ry} ${lx},${ly}`}
+              fill={snowFill} opacity={op}
+            />
+          );
+        };
+
+        // Shadow face: darkens the right-hand slope of each peak
+        const Shadow = ({ pts, op = 0.5 }) => (
+          <polygon points={pts} fill={backDark} opacity={op} />
+        );
+        const FgShadow = ({ pts, op = 0.5 }) => (
+          <polygon points={pts} fill={frontDark} opacity={op} />
+        );
+
         return (
-          <g className="window-mountains" clipPath={`url(#${clipId})`} opacity={mountainOpacity}>
-            <polygon
-              points={`${x - 30},${mountainBase} ${x + 60},${y + h - 118} ${x + 128},${mountainBase} ${x + 220},${y + h - 130} ${x + 330},${mountainBase} ${x + 430},${y + h - 112} ${x + w + 40},${mountainBase}`}
-              fill={farFill}
-            />
-            <polygon
-              points={`${x - 20},${mountainBase + 16} ${x + 96},${y + h - 96} ${x + 190},${mountainBase + 16} ${x + 285},${y + h - 122} ${x + 390},${mountainBase + 16} ${x + 510},${y + h - 104} ${x + w + 30},${mountainBase + 16}`}
-              fill={nearFill}
-            />
-            <polygon points={`${x + 60},${y + h - 118} ${x + 78},${y + h - 96} ${x + 48},${y + h - 96}`} fill={snowFill} opacity="0.62" />
-            <polygon points={`${x + 220},${y + h - 130} ${x + 242},${y + h - 102} ${x + 200},${y + h - 104}`} fill={snowFill} opacity="0.55" />
-            <polygon points={`${x + 285},${y + h - 122} ${x + 306},${y + h - 96} ${x + 266},${y + h - 98}`} fill={snowFill} opacity="0.6" />
-            <polygon points={`${x + 430},${y + h - 112} ${x + 448},${y + h - 91} ${x + 414},${y + h - 92}`} fill={snowFill} opacity="0.5" />
+          <g className="window-mountains" clipPath={`url(#${clipId})`} opacity={landscapeOpacity}>
+
+            {/* ── background mountains ── */}
+            <polygon points={bgPoints} fill={backFill} />
+
+            {/* bg right-face shadows */}
+            <Shadow pts={`${x+46},${ridgeBase-72} ${x+100},${ridgeBase-38} ${x+74},${ridgeBase-42}`} />
+            <Shadow pts={`${x+160},${ridgeBase-108} ${x+228},${ridgeBase-22} ${x+196},${ridgeBase-38}`} />
+            <Shadow pts={`${x+292},${ridgeBase-144} ${x+354},${ridgeBase-56} ${x+326},${ridgeBase-76}`} />
+            <Shadow pts={`${x+426},${ridgeBase-96} ${x+w+50},${ridgeBase} ${x+462},${ridgeBase-48}`} />
+
+            {/* bg snow caps */}
+            <SnowCap peak={[x+46, ridgeBase-72]} left={[x-30, ridgeBase]} right={[x+74, ridgeBase-42]} leftT={0.36} rightT={0.58} />
+            <SnowCap peak={[x+160, ridgeBase-108]} left={[x+100, ridgeBase-38]} right={[x+196, ridgeBase-38]} leftT={0.38} rightT={0.5} />
+            <SnowCap peak={[x+292, ridgeBase-144]} left={[x+228, ridgeBase-22]} right={[x+326, ridgeBase-76]} leftT={0.36} rightT={0.52} />
+            <SnowCap peak={[x+426, ridgeBase-96]} left={[x+354, ridgeBase-56]} right={[x+462, ridgeBase-48]} leftT={0.38} rightT={0.58} />
+
+            {/* ── foreground mountains ── */}
+            <polygon points={fgPoints} fill={frontFill} />
+
+            {/* fg right-face shadows */}
+            <FgShadow pts={`${x+78},${ridgeBase-62} ${x+188},${ridgeBase} ${x+136},${ridgeBase-16}`} />
+            <FgShadow pts={`${x+308},${ridgeBase-78} ${x+420},${ridgeBase} ${x+366},${ridgeBase-20}`} />
+
+            {/* ── forest treeline ── */}
+            <rect x={x} y={grassY - 18} width={w} height="18" fill={forestFill} />
+
+            {/* ── grass ── */}
+            <rect x={x} y={grassY} width={w} height={h - (grassY - y)} fill={grassFill} />
+            <rect x={x} y={grassY} width={w} height="5" fill={grassTop} opacity="0.7" />
+
           </g>
         );
       })()}
 
-      {/* stars (visible at night, fade with night amount) */}
+      {/* stars */}
       {night > 0.15 && [
         [40, 30], [80, 80], [140, 50], [200, 110], [240, 40],
         [60, 160], [110, 200], [180, 230], [330, 150], [370, 90],
@@ -250,30 +302,18 @@ function WindowView({ time, x, y, w, h }) {
         return <rect key={i} className={cls} x={x + dx} y={y + dy} width={sz} height={sz} fill="#fff" opacity={Math.min(1, (night - 0.15) / 0.7)} />;
       })}
 
-      {/* shooting star — brief animated streak at night */}
+      {/* shooting star */}
       {(() => {
         const s = shootingStar(t, w, h, night);
         if (!s) return null;
         return (
           <g clipPath={`url(#${clipId})`} opacity={s.opacity}>
             <g key={s.slot} className="shooting-star" opacity="0" transform={`translate(${x + s.startX} ${y + s.startY})`}>
-              <animateTransform
-                attributeName="transform"
-                type="translate"
+              <animateTransform attributeName="transform" type="translate"
                 values={`${x + s.startX} ${y + s.startY}; ${x + s.endX} ${y + s.endY}; ${x + s.endX} ${y + s.endY}`}
-                keyTimes="0;0.85;1"
-                dur="12s"
-                begin="0s"
-                fill="freeze"
-              />
-              <animate
-                attributeName="opacity"
-                values="0;1;0.9;0.65;0;0"
-                keyTimes="0;0.1;0.45;0.72;0.92;1"
-                dur="12s"
-                begin="0s"
-                fill="freeze"
-              />
+                keyTimes="0;0.85;1" dur="12s" begin="0s" fill="freeze" />
+              <animate attributeName="opacity" values="0;1;0.9;0.65;0;0"
+                keyTimes="0;0.1;0.45;0.72;0.92;1" dur="12s" begin="0s" fill="freeze" />
               <line x1={s.tailX} y1={s.tailY} x2="0" y2="0" stroke="#dceeff" strokeWidth="5" opacity="0.28" strokeLinecap="round" />
               <line x1={s.tailX * 0.7} y1={s.tailY * 0.7} x2="0" y2="0" stroke="#ffffff" strokeWidth="2" opacity="0.9" strokeLinecap="round" />
               <rect x="-2" y="-2" width="4" height="4" fill="#fff" style={{ filter: "drop-shadow(0 0 4px #ffffff) drop-shadow(0 0 9px #cfe8ff)" }} />
@@ -299,10 +339,9 @@ function WindowView({ time, x, y, w, h }) {
       {/* sun */}
       {sun && (() => {
         const sx = arcX(sun.frac), sy = arcY(sun.frac);
-        // sun color: orange near horizon, yellow when high
         const high = Math.sin(Math.max(0, Math.min(1, sun.frac)) * Math.PI);
         const sunCore = _mix("#ff7a3a", "#ffd000", high);
-        const sunRim = _mix("#ffb070", "#ffe14a", high);
+        const sunRim  = _mix("#ffb070", "#ffe14a", high);
         return (
           <g clipPath={`url(#${clipId})`} style={{ filter: `drop-shadow(0 0 12px ${sunRim})` }}>
             <rect x={sx} y={sy} width="44" height="44" fill={sunRim} />
@@ -313,7 +352,7 @@ function WindowView({ time, x, y, w, h }) {
         );
       })()}
 
-      {/* clouds (drift with simulated time, loop in from left & off to right) */}
+      {/* clouds */}
       {(() => {
         const cloudDefs = [
           { yOff: 130, w1: 60, w2: 44, period: 10, phase: 0.10 },
@@ -326,7 +365,7 @@ function WindowView({ time, x, y, w, h }) {
         return (
           <g clipPath={`url(#${clipId})`} opacity={cloudOpacity}>
             {cloudDefs.map((c, i) => {
-              const frac = ((t / c.period + c.phase) % 1 + 1) % 1; // 0..1 looping
+              const frac = ((t / c.period + c.phase) % 1 + 1) % 1;
               const cx = x - 100 + frac * (w + 200);
               const cy = y + c.yOff;
               return (
@@ -339,7 +378,6 @@ function WindowView({ time, x, y, w, h }) {
           </g>
         );
       })()}
-
     </g>
   );
 }
@@ -353,21 +391,15 @@ function DigitalClock({ time, x = 395, y = 160, mealLabel = null, showTime = fal
   const displayMeal = mealLabel && !showTime;
   const label = displayMeal ? mealLabel : `${hh}:${mm} ${ampm}`;
   const fontSize = displayMeal ? 46 : 42;
-
   return (
     <g style={{ cursor: mealLabel ? "pointer" : "default" }} onClick={mealLabel ? onToggle : undefined}>
       <rect x={x} y={y} width="148" height="80" fill="#1a1a1a" />
       <rect x={x} y={y} width="148" height="5" fill="#2c2c2c" />
       <rect x={x} y={y + 75} width="148" height="5" fill="#0a0a0a" />
       <rect x={x + 8} y={y + 8} width="132" height="64" fill="#240a0a" />
-      <text
-        x={x + 74} y={y + 58}
-        fontFamily="'VT323', monospace"
-        fontSize={fontSize}
-        fill="#ff5050"
-        textAnchor="middle"
-        style={{ filter: "drop-shadow(0 0 0.6px #ff8080)", textRendering: "geometricPrecision" }}
-      >
+      <text x={x + 74} y={y + 58} fontFamily="'VT323', monospace" fontSize={fontSize}
+        fill="#ff5050" textAnchor="middle"
+        style={{ filter: "drop-shadow(0 0 0.6px #ff8080)", textRendering: "geometricPrecision" }}>
         {label}
       </text>
       <rect x={x + 72} y={y - 6} width="4" height="6" fill="#777" />
@@ -375,35 +407,21 @@ function DigitalClock({ time, x = 395, y = 160, mealLabel = null, showTime = fal
   );
 }
 
-// ---------- pixel desk lamp (gooseneck/hooded — sits on nightstand) ----------
-// FIX: Removed duplicate state. This is now a "dumb" component that just listens to the Room.
+// ---------- pixel desk lamp ----------
 function DeskLamp({ on, onClick }) {
   return (
     <g style={{ cursor: "pointer" }} onClick={onClick}>
-      {/* base — heavy disc */}
       <rect x="118" y="472" width="40" height="10" fill="#1a140e" />
       <rect x="122" y="466" width="32" height="6" fill="#2a2118" />
       <rect x="130" y="462" width="16" height="4" fill="#3a2e22" />
-      
-      {/* stem — vertical */}
       <rect x="136" y="378" width="4" height="84" fill="#1a140e" />
-      
-      {/* bend — curved elbow */}
       <rect x="136" y="374" width="14" height="4" fill="#1a140e" />
       <rect x="148" y="374" width="4" height="6" fill="#1a140e" />
       <rect x="148" y="378" width="6" height="4" fill="#1a140e" />
-      
-      {/* short neck angled down-right */}
       <polygon points="148,378 152,378 158,388 152,390" fill="#1a140e" />
-      
-      {/* hood — angled down and right */}
       <polygon points="148,388 162,382 182,404 160,416" fill="#1a140e" />
-      {/* hood top rim */}
       <polygon points="148,388 162,382 160,386 150,390" fill="#3a2e22" />
-      {/* hood bottom opening */}
       <polygon points="160,416 182,404 179,402 159,413" fill="#0a0a0a" />
-
-      {/* Inner bulb filament (stays here to sit physically inside the hood) */}
       {on && (
         <ellipse cx="171" cy="410" rx="6" ry="3" transform="rotate(-40 171 410)" fill="#ffffff" />
       )}
@@ -420,7 +438,6 @@ function Room({ scene, time, lampOn, monitorOn, snoozed, onPhoneClick, onMonitor
   const isDinner = scene === "dinner";
   const mealLabel = isLunch ? "LUNCH" : isDinner ? "DINNER" : null;
   const [showTimeOverride, setShowTimeOverride] = React.useState(false);
-  // when meal scene changes, reset the toggle so we default to showing the meal label
   React.useEffect(() => { setShowTimeOverride(false); }, [mealLabel]);
 
   const [localLamp, setLocalLamp] = React.useState(lampOn);
@@ -432,12 +449,12 @@ function Room({ scene, time, lampOn, monitorOn, snoozed, onPhoneClick, onMonitor
   };
 
   const winX = 600, winY = 90, winW = 480, winH = 380;
-  const windowFrameFill = "#1b1009";
+  const windowFrameFill = "#3f2817";
+  const windowSillFill = windowFrameFill;
 
   return (
     <svg className="room-svg" viewBox="0 0 1800 868" preserveAspectRatio="xMidYMid meet">
       <defs>
-        {/* FIX: ALL gradients are now permanently defined here at the top so the browser never loses them */}
         <linearGradient id="lampBeam" x1="170" y1="410" x2="320" y2="600" gradientUnits="userSpaceOnUse">
           <stop offset="0%" stopColor="#ffffff" stopOpacity="0.9" />
           <stop offset="15%" stopColor="#ffee88" stopOpacity="0.6" />
@@ -475,9 +492,23 @@ function Room({ scene, time, lampOn, monitorOn, snoozed, onPhoneClick, onMonitor
           <rect x="0" y="59" width="120" height="1" fill="#000" opacity="0.06" />
           <rect x="0" y="0" width="1" height="60" fill="#000" opacity="0.05" />
         </pattern>
+        {/*
+          FIXED MASK — expanded to cover the full window assembly:
+          outer frame (winX-16 .. winX+winW+16, winY-16 .. winY+winH+16),
+          sill (.. winY+winH+24), sill-trim (.. winY+winH+22), curtain rod (winY-30).
+          We cut out winX-44, winY-36 to winX+winW+44, winY+winH+30
+          so ALL window hardware is excluded from the darkness overlay,
+          preventing the "different shade" artefact on the frame borders.
+          The mullion dividers inside the window are ALSO inside this cutout
+          so they won't be affected either — consistent with the glass panes.
+        */}
         <mask id="roomDarknessMask">
           <rect x="0" y="0" width="1800" height="1000" fill="#fff" />
-          <rect x={winX - 16} y={winY - 16} width={winW + 32} height={winH + 16} fill="#000" />
+          <rect
+            x={winX - 44} y={winY - 36}
+            width={winW + 88} height={winH + 66}
+            fill="#000"
+          />
         </mask>
       </defs>
 
@@ -490,38 +521,29 @@ function Room({ scene, time, lampOn, monitorOn, snoozed, onPhoneClick, onMonitor
       <rect x="0" y="560" width="1800" height="440" fill="url(#floorBoards)" />
       <rect x="0" y="560" width="1800" height="6" fill="#a48560" opacity="0.4" />
 
-      {/* rug — shifted up one more floor-plank band (now y=604 to y=824) */}
+      {/* rug */}
       <g>
         <ellipse cx="885" cy="788" rx="430" ry="18" fill="#000" opacity="0.1" />
-        {/* base */}
         <rect x="460" y="604" width="850" height="176" fill="#7a3838" />
-        {/* outer light & dark trims */}
         <rect x="460" y="604" width="850" height="6" fill="#9a4848" />
         <rect x="460" y="774" width="850" height="6" fill="#5a2828" />
         <rect x="460" y="604" width="6" height="176" fill="#9a4848" opacity="0.7" />
         <rect x="1304" y="604" width="6" height="176" fill="#5a2828" opacity="0.7" />
-        {/* pattern wrapped in a vertical-compress transform so it reads as angling
-            back toward the window wall (away from the viewer). Rug base, outer trims,
-            and shadow ellipse are UNCHANGED — only the gold pattern is reoriented. */}
         <g transform="matrix(1 0 0 0.82 0 107)">
-          {/* inner double-border (gold) */}
           <rect x="478" y="620" width="814" height="2" fill="#c08b3e" opacity="0.75" />
           <rect x="478" y="806" width="814" height="2" fill="#c08b3e" opacity="0.75" />
           <rect x="478" y="620" width="2" height="188" fill="#c08b3e" opacity="0.65" />
           <rect x="1290" y="620" width="2" height="188" fill="#c08b3e" opacity="0.65" />
           <rect x="486" y="628" width="798" height="1" fill="#c08b3e" opacity="0.35" />
           <rect x="486" y="799" width="798" height="1" fill="#c08b3e" opacity="0.35" />
-          {/* central field accent stripes (top + bottom of medallion) */}
           <rect x="500" y="648" width="770" height="2" fill="#c08b3e" opacity="0.45" />
           <rect x="500" y="778" width="770" height="2" fill="#c08b3e" opacity="0.45" />
-          {/* centered diamond medallion */}
           <g transform="translate(885 714)">
             <rect x="-60" y="-2" width="120" height="2" fill="#c08b3e" opacity="0.5" />
             <rect x="-60" y="0" width="120" height="2" fill="#c08b3e" opacity="0.5" />
             <polygon points="0,-26 26,0 0,26 -26,0" fill="none" stroke="#c08b3e" strokeWidth="2" opacity="0.6" />
             <rect x="-3" y="-3" width="6" height="6" fill="#c08b3e" opacity="0.7" />
           </g>
-          {/* corner anchors */}
           <rect x="478" y="620" width="6" height="6" fill="#c08b3e" opacity="0.55" />
           <rect x="1286" y="620" width="6" height="6" fill="#c08b3e" opacity="0.55" />
           <rect x="478" y="802" width="6" height="6" fill="#c08b3e" opacity="0.55" />
@@ -543,7 +565,7 @@ function Room({ scene, time, lampOn, monitorOn, snoozed, onPhoneClick, onMonitor
         <rect x="300" y="230" width="30" height="20" fill="#3a2614" opacity="0.7" />
       </g>
 
-      {/* ===== NIGHTSTAND (behind bed) ===== */}
+      {/* ===== NIGHTSTAND ===== */}
       <g>
         <ellipse cx="138" cy="610" rx="58" ry="8" fill="#000" opacity="0.2" />
         <rect x="94" y="480" width="90" height="120" fill="#6a4a30" />
@@ -555,21 +577,17 @@ function Room({ scene, time, lampOn, monitorOn, snoozed, onPhoneClick, onMonitor
         <rect x="102" y="504" width="74" height="3" fill="#7a5a3a" />
         <rect x="96" y="600" width="10" height="14" fill="#3a2614" />
         <rect x="172" y="600" width="10" height="14" fill="#3a2614" />
-
         <g className={isAlarm && !snoozed ? "phone-shaking" : "phone-still"} onClick={isAlarm ? onPhoneClick : undefined} style={{ cursor: isAlarm ? "pointer" : "default" }}>
           <rect x="96" y="466" width="32" height="14" fill="#0a0a0a" />
           <rect x="98" y="468" width="28" height="10" fill={isAlarm && !snoozed ? "#ff5f5f" : "#1a1a1a"} />
           <rect x="96" y="466" width="32" height="2" fill="#2c2c2c" />
         </g>
-
-        {/* Lamp click successfully bound here */}
         <g transform="translate(19 0)">
           <DeskLamp on={localLamp} onClick={handleLampToggle} />
         </g>
-        
       </g>
 
-      {/* ===== BED (base — rendered before sleeper so blanket can go on top) ===== */}
+      {/* ===== BED (base) ===== */}
       <g>
         <ellipse cx="272" cy="800" rx="320" ry="14" fill="#000" opacity="0.18" />
         <polygon points="0,420 38,420 48,408 0,408" fill="#5a3a22" />
@@ -585,7 +603,7 @@ function Room({ scene, time, lampOn, monitorOn, snoozed, onPhoneClick, onMonitor
         <rect x="518" y="720" width="20" height="36" fill="#3a2614" />
       </g>
       <Sleeper visible={isNight || isAlarm} />
-      {/* blanket rendered AFTER sleeper so it layers on top of the head */}
+      {/* blanket on top of sleeper */}
       <g>
         <rect x="124" y="534" width="414" height="186" fill="#5a7a3a" />
         <rect x="124" y="534" width="414" height="10" fill="#7a9a4a" />
@@ -596,16 +614,20 @@ function Room({ scene, time, lampOn, monitorOn, snoozed, onPhoneClick, onMonitor
         {(isNight || isAlarm) && <rect x="124" y="522" width="316" height="20" fill="#5a7a3a" />}
       </g>
 
-      {/* ===== WINDOW ===== */}
+      {/* ===== WINDOW — frame, glass content, then mullions drawn AFTER overlay ===== */}
       <g>
+        {/* outer frame */}
         <rect x={winX - 16} y={winY - 16} width={winW + 32} height={winH + 32} fill={windowFrameFill} />
+        {/* glass area background (in case WindowView clips) */}
         <rect x={winX} y={winY} width={winW} height={winH} fill={windowFrameFill} />
-        <rect x={winX - 22} y={winY + winH} width={winW + 44} height="18" fill="#3a2614" />
-        <rect x={winX - 22} y={winY + winH + 16} width={winW + 44} height="6" fill="#2a1810" />
+        {/* sill */}
+        <rect x={winX - 22} y={winY + winH} width={winW + 44} height="18" fill={windowSillFill} />
+        <rect x={winX - 22} y={winY + winH + 16} width={winW + 44} height="6" fill={windowFrameFill} />
+        {/* sky/landscape content */}
         <WindowView time={time} x={winX} y={winY} w={winW} h={winH} />
-        <rect x={winX + winW / 3 - 3} y={winY} width="6" height={winH} fill={windowFrameFill} />
-        <rect x={winX + (2 * winW) / 3 - 3} y={winY} width="6" height={winH} fill={windowFrameFill} />
-        <rect x={winX} y={winY + winH / 2 - 3} width={winW} height="6" fill={windowFrameFill} />
+        {/* NOTE: Mullions are moved to render AFTER the darkness overlay below,
+            so they get the same darkening as the rest of the room walls */}
+        {/* curtain rod brackets */}
         <rect x={winX - 36} y={winY - 26} width={winW + 72} height="6" fill="#5a3a22" />
         <rect x={winX - 40} y={winY - 30} width="10" height="14" fill="#5a3a22" />
         <rect x={winX + winW + 30} y={winY - 30} width="10" height="14" fill="#5a3a22" />
@@ -637,8 +659,6 @@ function Room({ scene, time, lampOn, monitorOn, snoozed, onPhoneClick, onMonitor
         <rect x="1260" y="452" width="420" height="4" fill="#3a2614" />
         <rect x="1272" y="456" width="14" height="140" fill="#3a2614" />
         <rect x="1272" y="594" width="14" height="6" fill="#2a1810" />
-
-        {/* Monitor - Always On */}
         <g className="monitor-on" onClick={onMonitorClick} style={{ cursor: "pointer" }}>
           <rect x="1428" y="412" width="60" height="20" fill="#1a1a1a" />
           <rect x="1416" y="422" width="84" height="10" fill="#0a0a0a" />
@@ -646,50 +666,39 @@ function Room({ scene, time, lampOn, monitorOn, snoozed, onPhoneClick, onMonitor
           <rect x="1320" y="252" width="296" height="146" fill="#0a0a0a" />
           <rect x="1320" y="252" width="296" height="8" fill="#2c2c2c" />
           <rect x="1320" y="394" width="296" height="4" fill="#1a1a1a" />
-          {/* Screen background is permanently dark blue-grey */}
           <rect x="1328" y="260" width="280" height="130" fill="#1a1b1e" />
-          {/* MiniDesktop renders unconditionally */}
           <MiniDesktop time={time} />
-          {/* Power LED is permanently white */}
           <rect x="1602" y="392" width="4" height="4" fill="#ffffff" />
         </g>
-        
         <rect x="1325" y="437" width="170" height="10" fill="#1a1a1a" />
         <rect x="1325" y="437" width="170" height="2" fill="#3a3a3a" />
         {[0, 1].map((r) => <rect key={r} x="1325" y={437 + r * 3} width="170" height="2" fill="#5a5a5a" opacity="0.7" />)}
-        
         <ellipse cx="1535" cy="439" rx="12" ry="7" fill="#1a1a1a" />
         <rect x="1535" y="434" width="2" height="5" fill="#666" />
-
         <g>
           <rect x="1281" y="398" width="30" height="38" fill="#c25d4a" />
           <rect x="1281" y="398" width="30" height="6" fill="#3a2118" />
           <rect x="1285" y="404" width="22" height="6" fill="#5a2a1a" />
           <rect x="1311" y="406" width="6" height="20" fill="#c25d4a" />
         </g>
-
-        {/* PC Tower - Always On */}
         <g>
           <rect x="1310" y="480" width="58" height="120" fill="#2c2c2c" />
           <rect x="1310" y="480" width="58" height="4" fill="#4a4a4a" />
           <rect x="1320" y="494" width="38" height="3" fill="#1a1a1a" />
           <rect x="1320" y="502" width="28" height="3" fill="#1a1a1a" />
-          {/* Opacity is permanently 1 */}
           <rect x="1356" y="592" width="6" height="6" fill="#ffffff" opacity={1} />
         </g>
       </g>
-
-
 
       {/* ===== BOOKSHELF ===== */}
       <g>
         <rect x="1680" y="200" width="120" height="400" fill="#5a3a22" />
         <rect x="1680" y="200" width="120" height="10" fill="#3a2614" />
         <rect x="1680" y="200" width="10" height="400" fill="#3a2614" />
-        {[244, 320, 396, 472].map((y, i) => (
-          <g key={y}>
-            <rect x="1690" y={y + 56} width="108" height="6" fill="#3a2614" />
-            <BookRow y={y} idx={i} />
+        {[244, 320, 396, 472].map((shelfY, i) => (
+          <g key={shelfY}>
+            <rect x="1690" y={shelfY + 56} width="108" height="6" fill="#3a2614" />
+            <BookRow y={shelfY} idx={i} />
           </g>
         ))}
         <rect x="1712" y="180" width="40" height="20" fill="#4a7a4a" />
@@ -710,9 +719,7 @@ function Room({ scene, time, lampOn, monitorOn, snoozed, onPhoneClick, onMonitor
         <rect x="1688" y="790" width="2" height="32" fill="#2a4a2a" opacity="0.7" />
       </g>
 
-      {/* ===== INTERIOR BRIGHTNESS =====
-          Driven entirely by the window time (simulated). Scene state no longer
-          forces a fixed darkness — the room dims/brightens with the sky. */}
+      {/* ===== INTERIOR DARKNESS OVERLAY ===== */}
       {(() => {
         const tHr = time.getHours() + time.getMinutes()/60 + time.getSeconds()/3600;
         const night = nightAmount(tHr);
@@ -720,15 +727,25 @@ function Room({ scene, time, lampOn, monitorOn, snoozed, onPhoneClick, onMonitor
         const windowDimOpacity = night * 0.28;
         return (
           <>
-            <rect x="0" y="0" width="1800" height="1000" fill="#0a1c36" opacity={overlayOpacity} mask="url(#roomDarknessMask)" style={{ mixBlendMode: "multiply", pointerEvents: "none" }} />
-            <rect x={winX - 16} y={winY - 16} width={winW + 32} height={winH + 16} fill="#07142a" opacity={windowDimOpacity} style={{ mixBlendMode: "multiply", pointerEvents: "none" }} />
+            <rect x="0" y="0" width="1800" height="1000" fill="#0a1c36" opacity={overlayOpacity}
+              mask="url(#roomDarknessMask)" style={{ mixBlendMode: "multiply", pointerEvents: "none" }} />
+            <rect x={winX - 16} y={winY - 16} width={winW + 32} height={winH + 16} fill="#07142a"
+              opacity={windowDimOpacity} style={{ mixBlendMode: "multiply", pointerEvents: "none" }} />
           </>
         );
       })()}
       {isAlarm && <rect x="0" y="0" width="1800" height="1000" fill="#ffb084" opacity="0.07" style={{ mixBlendMode: "screen", pointerEvents: "none" }} />}
-      
-      {/* ===== LIGHTING OVERLAYS (Rendered AFTER night overlay to bypass the darkness) ===== */}
-      {/* FIX: Now successfully using the resolved url links from the top defs block */}
+
+      {/* ===== WINDOW MULLIONS — drawn AFTER darkness overlay so they darken consistently ===== */}
+      {/* These are the interior crossbar dividers. By rendering them here they receive the same
+          darkness overlay as the rest of the room walls, preventing the "lighter shade" artefact. */}
+      <g pointerEvents="none">
+        <rect x={winX + winW / 3 - 3} y={winY} width="6" height={winH} fill={windowFrameFill} />
+        <rect x={winX + (2 * winW) / 3 - 3} y={winY} width="6" height={winH} fill={windowFrameFill} />
+        <rect x={winX} y={winY + winH / 2 - 3} width={winW} height="6" fill={windowFrameFill} />
+      </g>
+
+      {/* ===== LIGHTING OVERLAYS ===== */}
       {localLamp && (
         <g style={{ mixBlendMode: "screen", pointerEvents: "none" }} transform="translate(19 0)">
           <ellipse cx="154" cy="420" rx="200" ry="140" fill="url(#lampGlow)" opacity="0.95" />
@@ -737,21 +754,15 @@ function Room({ scene, time, lampOn, monitorOn, snoozed, onPhoneClick, onMonitor
         </g>
       )}
 
-      {/* Redraw the monitor screen after the darkness pass so it stays luminous. */}
+      {/* Redraw monitor screen after darkness pass */}
       {(() => {
         const tHr = time.getHours() + time.getMinutes()/60 + time.getSeconds()/3600;
         const night = nightAmount(tHr);
         return (
           <g pointerEvents="none" transform="translate(-8 0)">
-            <rect
-              x="1322"
-              y="254"
-              width="292"
-              height="142"
-              fill="#75d8f0"
+            <rect x="1322" y="254" width="292" height="142" fill="#75d8f0"
               opacity={0.04 + night * 0.1}
-              style={{ mixBlendMode: "screen", filter: "drop-shadow(0 0 10px #7ee8ff) drop-shadow(0 0 20px #5bbfff)" }}
-            />
+              style={{ mixBlendMode: "screen", filter: "drop-shadow(0 0 10px #7ee8ff) drop-shadow(0 0 20px #5bbfff)" }} />
             {night > 0.05 && (
               <g opacity={0.35 + night * 0.39}>
                 <rect x="1328" y="260" width="280" height="130" fill="#1a1b1e" />
@@ -768,14 +779,13 @@ function Room({ scene, time, lampOn, monitorOn, snoozed, onPhoneClick, onMonitor
         </g>
       )}
 
-      {/* ===== MONITOR GLOW (Always On) ===== */}
+      {/* ===== MONITOR GLOW (always on) ===== */}
       <g style={{ mixBlendMode: "screen", pointerEvents: "none" }}>
-        <ellipse cx="1470" cy="446" rx="300" ry="240" fill="url(#monGlow)" opacity={0.85 - nightAmount(time.getHours() + time.getMinutes()/60 + time.getSeconds()/3600) * 0.45} />
+        <ellipse cx="1470" cy="446" rx="300" ry="240" fill="url(#monGlow)"
+          opacity={0.85 - nightAmount(time.getHours() + time.getMinutes()/60 + time.getSeconds()/3600) * 0.45} />
       </g>
 
-      {/* Chair + Worker rendered AFTER the monitor glow so the seat sits on top of the light.
-          When working, the chair renders AFTER the worker so the chair-back covers his back.
-          During meals (lunch/dinner), the worker is away — only the chair remains. */}
+      {/* Chair + Worker */}
       {isWork ? (
         <>
           <Worker visible={true} />
@@ -785,7 +795,7 @@ function Room({ scene, time, lampOn, monitorOn, snoozed, onPhoneClick, onMonitor
         <Chair />
       )}
 
-      {/* ===== CLOCK (rendered last so its red drop-shadow glow sits ON TOP of the night overlay) ===== */}
+      {/* ===== CLOCK ===== */}
       <DigitalClock
         time={time}
         x={395}
@@ -798,17 +808,13 @@ function Room({ scene, time, lampOn, monitorOn, snoozed, onPhoneClick, onMonitor
   );
 }
 
-
-
 // Mini desktop UI rendered inside the monitor screen.
-// Screen rect: x=1328 y=376 w=280 h=130
 function MiniDesktop({ time }) {
   const SX = 1328, SY = 260, SW = 280, SH = 130;
   const hours = time.getHours();
   const ampm = hours >= 12 ? "PM" : "AM";
   const hh = String(hours % 12 || 12).padStart(2, "0");
   const mm = String(time.getMinutes()).padStart(2, "0");
-  // file icons on the left, terminal panel on the right
   const icons = [
     { y: 0, label: "about_me" },
     { y: 1, label: "projects" },
@@ -817,15 +823,12 @@ function MiniDesktop({ time }) {
   ];
   return (
     <g>
-      {/* desktop background \u2014 teal like maximized */}
       <rect x={SX} y={SY} width={SW} height={SH} fill="#2d6e8a" />
-      {/* menubar (light grey) */}
       <rect x={SX} y={SY} width={SW} height={9} fill="#d4d0c8" />
       <rect x={SX} y={SY + 8} width={SW} height={1} fill="#5a564f" />
       <rect x={SX + 3} y={SY + 2} width={5} height={5} fill="#c25d4a" />
       <text x={SX + 12} y={SY + 7} fontFamily="'VT323', monospace" fontSize="8" fill="#1a1a1a">RoomOS</text>
       <text x={SX + SW - 4} y={SY + 7} fontFamily="'VT323', monospace" fontSize="8" fill="#1a1a1a" textAnchor="end">{hh}:{mm} {ampm}</text>
-      {/* left icon column \u2014 yellow folders matching maximized */}
       {icons.map((ic, i) => {
         const isAbout = ic.label === "about_me";
         const isFile = isAbout || ic.label === "README_txt";
@@ -834,7 +837,6 @@ function MiniDesktop({ time }) {
           <g key={i}>
             {isAbout ? (
               <g>
-                {/* mini headshot icon: parchment bg, head + shirt */}
                 <rect x={SX + 7} y={iy} width="13" height="13" fill="#f0e6c8" stroke="#2a2118" strokeWidth="0.6" />
                 <rect x={SX + 11} y={iy + 3} width="5" height="5" fill="#b07d5e" />
                 <rect x={SX + 11} y={iy + 3} width="5" height="2" fill="#3a2a1f" />
@@ -860,14 +862,11 @@ function MiniDesktop({ time }) {
           </g>
         );
       })}
-      {/* terminal window on the right */}
       <rect x={SX + 110} y={SY + 16} width={SW - 116} height={SH - 28} fill="#d4d0c8" stroke="#1a1a1a" strokeWidth="0.6" />
-      {/* classic blue title bar */}
       <rect x={SX + 110} y={SY + 16} width={SW - 116} height={9} fill="#000080" />
       <rect x={SX + 113} y={SY + 18} width={5} height={5} fill="#5cf08a" stroke="#1a4a1a" strokeWidth="0.4" />
       <text x={SX + 121} y={SY + 23} fontFamily="'VT323', monospace" fontSize="7" fill="#ffffff">~/term</text>
       <rect x={SX + SW - 12} y={SY + 18} width={5} height={5} fill="#d4d0c8" stroke="#1a1a1a" strokeWidth="0.4" />
-      {/* terminal body (dark) */}
       <rect x={SX + 111} y={SY + 25} width={SW - 118} height={SH - 38} fill="#0b0f0a" />
       <text x={SX + 114} y={SY + 36} fontFamily="'VT323', monospace" fontSize="9" fill="#8de8a3">$ ls</text>
       <text x={SX + 114} y={SY + 47} fontFamily="'VT323', monospace" fontSize="9" fill="#cfe6cf">about projects</text>
@@ -875,7 +874,6 @@ function MiniDesktop({ time }) {
       <text x={SX + 114} y={SY + 72} fontFamily="'VT323', monospace" fontSize="9" fill="#8de8a3">$ whoami</text>
       <text x={SX + 114} y={SY + 83} fontFamily="'VT323', monospace" fontSize="9" fill="#cfe6cf">saaket@njit</text>
       <text x={SX + 114} y={SY + 97} fontFamily="'VT323', monospace" fontSize="9" fill="#8de8a3">$ _</text>
-      {/* taskbar (light grey) */}
       <rect x={SX} y={SY + SH - 9} width={SW} height={9} fill="#d4d0c8" />
       <rect x={SX} y={SY + SH - 9} width={SW} height={1} fill="#5a564f" />
       <rect x={SX + 3} y={SY + SH - 7} width={16} height={5} fill="#d4d0c8" stroke="#1a1a1a" strokeWidth="0.4" />
@@ -905,19 +903,19 @@ function BookRow({ y, idx }) {
   const items = [];
   let i = 0;
   while (x < 1796 && i < ws.length) {
-    const w = ws[i];
-    if (x + w > 1796) break;
+    const ww = ws[i];
+    if (x + ww > 1796) break;
     const c = pal[i % pal.length];
     const h = 60 + ((i * 7) % 12) - 4;
     items.push(
       <g key={i}>
-        <rect x={x} y={y + 56 - h + 6} width={w} height={h} fill={c} />
+        <rect x={x} y={y + 56 - h + 6} width={ww} height={h} fill={c} />
         <rect x={x} y={y + 56 - h + 6} width={2} height={h} fill="#000" opacity="0.25" />
-        <rect x={x + w - 2} y={y + 56 - h + 6} width={2} height={h} fill="#fff" opacity="0.18" />
-        <rect x={x + 2} y={y + 56 - h + 18} width={w - 4} height={2} fill="#fff" opacity="0.35" />
+        <rect x={x + ww - 2} y={y + 56 - h + 6} width={2} height={h} fill="#fff" opacity="0.18" />
+        <rect x={x + 2} y={y + 56 - h + 18} width={ww - 4} height={2} fill="#fff" opacity="0.35" />
       </g>
     );
-    x += w + 1;
+    x += ww + 1;
     i++;
   }
   return <g>{items}</g>;
