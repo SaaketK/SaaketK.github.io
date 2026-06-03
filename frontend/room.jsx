@@ -324,7 +324,7 @@ function WindowView({ time, x, y, w, h }) {
         [380, 200], [50, 240], [220, 260], [320, 230], [120, 130],
         [260, 70], [400, 50], [100, 280], [350, 280], [430, 170],
         [410, 240], [160, 290], [70, 320], [280, 310], [400, 320],
-      ].filter(([dx, dy]) => dx < w - 8 && dy < 245).map(([dx, dy], i) => {
+      ].filter(([dx, dy]) => dx < w - 8 && dy < h - 210).map(([dx, dy], i) => {
         const cls = "star" + (i % 4 === 0 ? "" : i % 4 === 1 ? " s2" : i % 4 === 2 ? " s3" : " s4");
         const sz = i % 5 === 0 ? 4 : 3;
         return <rect key={i} className={cls} x={x + dx} y={y + dy} width={sz} height={sz} fill="#fff" opacity={Math.min(1, (night - 0.15) / 0.7)} />;
@@ -473,6 +473,11 @@ function Room({ scene, time, lampOn, monitorOn, snoozed, onPhoneClick, onMonitor
   const winX = 600, winY = 90, winW = 480, winH = 380;
   const windowFrameFill = "#3f2817";
   const windowSillFill = windowFrameFill;
+  const tHr = time.getHours() + time.getMinutes()/60 + time.getSeconds()/3600;
+  const roomNight = nightAmount(tHr);
+  const roomOverlayOpacity = roomNight * 0.8;
+  const windowDimOpacity = roomNight * 0.28;
+  const nightFrameFill = _mix(windowFrameFill, "#0f0c09", roomNight);
 
   return (
     <svg className="room-svg" viewBox="0 0 1800 868" preserveAspectRatio="xMidYMid meet">
@@ -514,23 +519,9 @@ function Room({ scene, time, lampOn, monitorOn, snoozed, onPhoneClick, onMonitor
           <rect x="0" y="59" width="120" height="1" fill="#000" opacity="0.06" />
           <rect x="0" y="0" width="1" height="60" fill="#000" opacity="0.05" />
         </pattern>
-        {/*
-          FIXED MASK — expanded to cover the full window assembly:
-          outer frame (winX-16 .. winX+winW+16, winY-16 .. winY+winH+16),
-          sill (.. winY+winH+24), sill-trim (.. winY+winH+22), curtain rod (winY-30).
-          We cut out winX-44, winY-36 to winX+winW+44, winY+winH+30
-          so ALL window hardware is excluded from the darkness overlay,
-          preventing the "different shade" artefact on the frame borders.
-          The mullion dividers inside the window are ALSO inside this cutout
-          so they won't be affected either — consistent with the glass panes.
-        */}
-        <mask id="roomDarknessMask">
-          <rect x="0" y="0" width="1800" height="1000" fill="#fff" />
-          <rect
-            x={winX - 44} y={winY - 36}
-            width={winW + 88} height={winH + 66}
-            fill="#000"
-          />
+        <mask id="roomDarknessMask" maskUnits="userSpaceOnUse" x="-4" y="-4" width="1808" height="1008">
+          <rect x="-4" y="-4" width="1808" height="1008" fill="#fff" />
+          <rect x={winX} y={winY} width={winW} height={winH} fill="#000" />
         </mask>
       </defs>
 
@@ -743,28 +734,22 @@ function Room({ scene, time, lampOn, monitorOn, snoozed, onPhoneClick, onMonitor
 
       {/* ===== INTERIOR DARKNESS OVERLAY ===== */}
       {(() => {
-        const tHr = time.getHours() + time.getMinutes()/60 + time.getSeconds()/3600;
-        const night = nightAmount(tHr);
-        const overlayOpacity = night * 0.8;
-        const windowDimOpacity = night * 0.28;
         return (
           <>
-            <rect x="0" y="0" width="1800" height="1000" fill="#0a1c36" opacity={overlayOpacity}
+            <rect x="-4" y="-4" width="1808" height="1008" fill="#05070a" opacity={roomOverlayOpacity}
               mask="url(#roomDarknessMask)" style={{ mixBlendMode: "multiply", pointerEvents: "none" }} />
-            <rect x={winX - 16} y={winY - 16} width={winW + 32} height={winH + 16} fill="#07142a"
+            <rect x={winX} y={winY} width={winW} height={winH} fill="#07142a"
               opacity={windowDimOpacity} style={{ mixBlendMode: "multiply", pointerEvents: "none" }} />
           </>
         );
       })()}
       {isAlarm && <rect x="0" y="0" width="1800" height="1000" fill="#ffb084" opacity="0.07" style={{ mixBlendMode: "screen", pointerEvents: "none" }} />}
 
-      {/* ===== WINDOW MULLIONS — drawn AFTER darkness overlay so they darken consistently ===== */}
-      {/* These are the interior crossbar dividers. By rendering them here they receive the same
-          darkness overlay as the rest of the room walls, preventing the "lighter shade" artefact. */}
+      {/* ===== WINDOW MULLIONS ===== */}
       <g pointerEvents="none">
-        <rect x={winX + winW / 3 - 3} y={winY} width="6" height={winH} fill={windowFrameFill} />
-        <rect x={winX + (2 * winW) / 3 - 3} y={winY} width="6" height={winH} fill={windowFrameFill} />
-        <rect x={winX} y={winY + winH / 2 - 3} width={winW} height="6" fill={windowFrameFill} />
+        <rect x={winX + winW / 3 - 3} y={winY} width="6" height={winH} fill={nightFrameFill} />
+        <rect x={winX + (2 * winW) / 3 - 3} y={winY} width="6" height={winH} fill={nightFrameFill} />
+        <rect x={winX} y={winY + winH / 2 - 3} width={winW} height="6" fill={nightFrameFill} />
       </g>
 
       {/* ===== LIGHTING OVERLAYS ===== */}
