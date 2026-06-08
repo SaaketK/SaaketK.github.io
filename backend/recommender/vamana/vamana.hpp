@@ -38,6 +38,11 @@ namespace distance {
     }
 }
 
+struct FloatVectorView {
+    const float* data = nullptr;
+    int dim = 0;
+};
+
 // Core Types
 
 struct BookNode {
@@ -62,6 +67,7 @@ class VamanaIndex {
         explicit VamanaIndex(Config cfg) : cfg_(cfg) {}
 
         void build(std::vector<BookNode> books);
+        void build_flat(const float* vecs, int n, int dim);
         std::vector<int> search(const std::vector<float>& query, int top_k) const;
 
         const BookNode& node(int id) const { return nodes_[id]; }
@@ -70,9 +76,15 @@ class VamanaIndex {
     private:
         Config cfg_;
         std::vector<BookNode> nodes_;
+        std::vector<float> values_;
+        int dim_ = 0;
         std::vector<std::vector<int>> adj_;
         int medoid_ = 0; // global starting point
 
+        FloatVectorView vector_view(int id) const;
+        float prune_alpha() const;
+        void normalize_values();
+        void build_graph();
         float dist(int a, int b) const;
         float dist_to_query(const std::vector<float>& q, int b) const;
         std::vector<Candidate> internal_greedy_search(int start, int target, int L,

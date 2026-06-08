@@ -25,19 +25,39 @@
 // ── Distance Helpers ─────────────────────────────────────────────────────────
 // Both arguments assumed L2-normalized when use_cosine is true.
 
+FloatVectorView VamanaIndex::vector_view(int id) const {
+    return {values_.data() + static_cast<size_t>(id) * dim_, dim_};
+}
+
+float VamanaIndex::prune_alpha() const {
+    return cfg_.use_cosine ? cfg_.alpha : cfg_.alpha * cfg_.alpha;
+}
+
+void VamanaIndex::normalize_values() {
+    if (!cfg_.use_cosine) return;
+
+    int n = static_cast<int>(nodes_.size());
+    for (int i = 0; i < n; i++) {
+        float* vec = values_.data() + static_cast<size_t>(i) * dim_;
+        float norm = 0.f;
+        for (int d = 0; d < dim_; d++) norm += vec[d] * vec[d];
+        norm = std::sqrt(norm);
+        if (norm > 0.f) for (int d = 0; d < dim_; d++) vec[d] /= norm;
+    }
+}
+
 float VamanaIndex::dist(int a, int b) const {
-    const auto& va = nodes_[a].vec;
-    const auto& vb = nodes_[b].vec;
-    const size_t d = va.size();
+    const FloatVectorView va = vector_view(a);
+    const FloatVectorView vb = vector_view(b);
 
     if (cfg_.use_cosine) {
         float dot = 0.f;
-        for (size_t i = 0; i < d; i++) dot += va[i] * vb[i];
+        for (int i = 0; i < va.dim; i++) dot += va.data[i] * vb.data[i];
         return 1.f - dot;
     } else {
         float sum = 0.f;
-        for (size_t i = 0; i < d; i++) {
-            float diff = va[i] - vb[i];
+        for (int i = 0; i < va.dim; i++) {
+            float diff = va.data[i] - vb.data[i];
             sum += diff * diff;
         }
         return sum;
@@ -46,17 +66,16 @@ float VamanaIndex::dist(int a, int b) const {
 
 // Query is normalized in search() before any calls reach here.
 float VamanaIndex::dist_to_query(const std::vector<float>& q, int b) const {
-    const auto& vb = nodes_[b].vec;
-    const size_t d = q.size();
+    const FloatVectorView vb = vector_view(b);
 
     if (cfg_.use_cosine) {
         float dot = 0.f;
-        for (size_t i = 0; i < d; i++) dot += q[i] * vb[i];
+        for (int i = 0; i < vb.dim; i++) dot += q[i] * vb.data[i];
         return 1.f - dot;
     } else {
         float sum = 0.f;
-        for (size_t i = 0; i < d; i++) {
-            float diff = q[i] - vb[i];
+        for (int i = 0; i < vb.dim; i++) {
+            float diff = q[i] - vb.data[i];
             sum += diff * diff;
         }
         return sum;
@@ -68,12 +87,13 @@ float VamanaIndex::dist_to_query(const std::vector<float>& q, int b) const {
 // Original was O(n²). For 8k nodes × 384 dims that was ~70M distance calls.
 int VamanaIndex::find_medoid() const {
     int n   = static_cast<int>(nodes_.size());
-    int dim = static_cast<int>(nodes_[0].vec.size());
 
-    std::vector<float> centroid(dim, 0.f);
-    for (const auto& node : nodes_)
-        for (int d = 0; d < dim; d++)
-            centroid[d] += node.vec[d];
+    std::vector<float> centroid(dim_, 0.f);
+    for (int i = 0; i < n; i++) {
+        const FloatVectorView vec = vector_view(i);
+        for (int d = 0; d < dim_; d++)
+            centroid[d] += vec.data[d];
+    }
     for (float& v : centroid) v /= static_cast<float>(n);
 
     // Normalize centroid so we can use the same fast dot-product distance.
@@ -88,12 +108,18 @@ int VamanaIndex::find_medoid() const {
     float best_dist = std::numeric_limits<float>::max();
     for (int i = 0; i < n; i++) {
         float d;
+        const FloatVectorView vec = vector_view(i);
         if (cfg_.use_cosine) {
             float dot = 0.f;
-            for (size_t k = 0; k < centroid.size(); k++) dot += centroid[k] * nodes_[i].vec[k];
+            for (int k = 0; k < dim_; k++) dot += centroid[k] * vec.data[k];
             d = 1.f - dot;
         } else {
-            d = distance::l2_squared(centroid, nodes_[i].vec);
+            float sum = 0.f;
+            for (int k = 0; k < dim_; k++) {
+                float diff = centroid[k] - vec.data[k];
+                sum += diff * diff;
+            }
+            d = sum;
         }
         if (d < best_dist) { best_dist = d; best = i; }
     }
@@ -254,7 +280,7 @@ void VamanaIndex::prune(int p, std::vector<Candidate>& candidates) {
             if (pruned[j]) continue;
             float dist_p_c     = candidates[j].first;
             float dist_vstar_c = dist(v_star, candidates[j].second);
-            if (cfg_.alpha * dist_vstar_c <= dist_p_c) pruned[j] = 1;
+            if (prune_alpha() * dist_vstar_c <= dist_p_c) pruned[j] = 1;
         }
     }
     adj_[p] = std::move(result);
@@ -266,16 +292,37 @@ void VamanaIndex::build(std::vector<BookNode> books) {
         throw std::invalid_argument("No books provided to VamanaIndex::build");
 
     nodes_ = std::move(books);
-    int n  = static_cast<int>(nodes_.size());
+    int n = static_cast<int>(nodes_.size());
+    dim_ = static_cast<int>(nodes_[0].vec.size());
+    values_.assign(static_cast<size_t>(n) * dim_, 0.f);
 
-    if (cfg_.use_cosine) {
-        for (auto& node : nodes_) {
-            float norm = 0.f;
-            for (float v : node.vec) norm += v * v;
-            norm = std::sqrt(norm);
-            if (norm > 0.f) for (float& v : node.vec) v /= norm;
-        }
+    for (int i = 0; i < n; i++) {
+        if (static_cast<int>(nodes_[i].vec.size()) != dim_)
+            throw std::invalid_argument("All vectors must have the same dimension");
+        std::copy(nodes_[i].vec.begin(), nodes_[i].vec.end(),
+                  values_.begin() + static_cast<size_t>(i) * dim_);
     }
+
+    normalize_values();
+    build_graph();
+}
+
+void VamanaIndex::build_flat(const float* vecs, int n, int dim) {
+    if (!vecs || n <= 0 || dim <= 0)
+        throw std::invalid_argument("Invalid flat vectors provided to VamanaIndex::build_flat");
+
+    nodes_.resize(n);
+    for (int i = 0; i < n; i++) nodes_[i].id = i;
+
+    dim_ = dim;
+    values_.assign(vecs, vecs + static_cast<size_t>(n) * dim);
+
+    normalize_values();
+    build_graph();
+}
+
+void VamanaIndex::build_graph() {
+    int n = static_cast<int>(nodes_.size());
 
     std::mt19937 rng(42);
     init_random_graph(rng);
@@ -294,7 +341,6 @@ void VamanaIndex::build(std::vector<BookNode> books) {
     std::cerr << "OpenMP threads: " << omp_get_max_threads() << "\n";
 #endif
 
-    // One mutex per node.
     std::vector<std::mutex> locks(n);
     std::atomic<int> done{0};
 
@@ -302,10 +348,8 @@ void VamanaIndex::build(std::vector<BookNode> books) {
     for (int idx = 0; idx < n; idx++) {
         int p = order[idx];
 
-        // Phase 1: greedy search — read adj_ with locked snapshots inside.
         auto candidates = internal_greedy_search(medoid_, p, cfg_.L, &locks);
 
-        // Phase 2: prune and update adj_[p] under its own lock.
         {
             std::lock_guard<std::mutex> lk(locks[p]);
             for (int nb : adj_[p])
@@ -321,7 +365,6 @@ void VamanaIndex::build(std::vector<BookNode> books) {
             prune(p, candidates);
         }
 
-        // Phase 3: reverse edges — always lock lower index first to prevent deadlock.
         std::vector<int> nbrs;
         {
             std::lock_guard<std::mutex> lk(locks[p]);
@@ -329,7 +372,6 @@ void VamanaIndex::build(std::vector<BookNode> books) {
         }
 
         for (int q : nbrs) {
-            // Acquire locks in consistent order (smaller index first) to avoid deadlock.
             int lo = std::min(p, q), hi = std::max(p, q);
             std::lock_guard<std::mutex> lk_lo(locks[lo]);
             std::lock_guard<std::mutex> lk_hi(locks[hi]);

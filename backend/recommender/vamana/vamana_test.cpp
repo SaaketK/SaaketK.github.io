@@ -8,7 +8,7 @@
 int main() {
     const int N   = 500;   // number of "books"
     const int DIM = 64;    // embedding dimension
-    const int K   = 10;    // neighbours to retrieve
+    const int K   = 10;    // neighbors to retrieve
 
     std::mt19937 rng(0);
     std::uniform_real_distribution<float> dist(-1.f, 1.f);
@@ -38,7 +38,7 @@ int main() {
     // ── Search ────────────────────────────────────────────────────────────────
     auto results = index.search(query, K);
 
-    std::cout << "Top-" << K << " results for query (= book 42):\n";
+    std::cout << "Top " << K << " results for query (= book 42):\n";
     bool found_42 = false;
     for (int i = 0; i < static_cast<int>(results.size()); ++i) {
         int id = results[i];
@@ -48,9 +48,9 @@ int main() {
     }
 
     if (found_42) {
-        std::cout << "\n✓ PASS: book 42 found in top-" << K << "\n";
+        std::cout << "\nPASS: book 42 found in top-" << K << "\n";
     } else {
-        std::cout << "\n✗ FAIL: book 42 not in top-" << K
+        std::cout << "\nFAIL: book 42 not in top-" << K
                   << " — try increasing L or R\n";
         return 1;
     }

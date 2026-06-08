@@ -24,12 +24,7 @@ extern "C" {
         auto* idx = static_cast<VamanaIndex*>(handle);
         if(!idx || !vecs || n <= 0 || dim <= 0) return;
 
-        std::vector<BookNode> nodes(n);
-        for(int i = 0; i < n; i++){
-            nodes[i].id = i;
-            nodes[i].vec.assign(vecs + i * dim, vecs + i * dim + dim);
-        }
-        idx->build(std::move(nodes));
+        idx->build_flat(vecs, n, dim);
     }
     /*
         Search the index
