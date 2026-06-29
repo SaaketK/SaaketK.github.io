@@ -65,9 +65,11 @@ reach me:
   },
   "Applications/": {
     type: "dir",
+    order: ["Books", "Tools", "GD"],
     children: {
       "Tools": { type: "app", app: "tools" },
       "Books": { type: "app", app: "books" },
+      "GD": { type: "app", app: "gd" },
     }
   },
   "projects/": {
@@ -145,22 +147,120 @@ query
 Summer 2026.
 
 stack:
-  Python
-  PyTorch
-  NumPy
-  C/CUDA (in progress)
+  Python / PyTorch / NumPy / SciPy
+  C (custom autograd + autodiff framework)
+  CUDA (backend scaffolded, not yet active)
 
 what it is:
-  a modular PINN framework in PyTorch with hard-enforced initial conditions. instead of soft boundary penalties, optimization is constrained purely to the physics residual of the governing ODE.
+  a research repo exploring PINNs across classical mechanics, quantum
+  mechanics, and financial mathematics. each sub-project trains a neural
+  network constrained by a governing differential equation and compares
+  the result against an analytical solution and a finite-difference baseline.
 
-results:
-  - applied to classical simple harmonic motion
-  - achieved lower maximum and average errors than finite difference methods across 10s, 30s, and 60s time periods
-  - extended to the quantum harmonic oscillator
-  - achieved up to a 2.3x PINN inference speedup over finite difference solve time
+---
 
-current work:
-  building a C/CUDA PINN solver for the Black-Scholes equation
+sub-projects:
+
+[1] C/CUDA PINN framework  (C-CUDA-PINNs/)
+  a from-scratch CPU-first PINN runtime written in C.
+  components:
+    - tape-based reverse-mode autograd engine
+    - differentiable ops: add, sub, mul, square, mean, tanh, matmul, MSE
+    - MLP layers with tanh activations
+    - SGD and Adam optimizers
+    - forward-mode JetTensor for first and second PDE derivatives
+    - latin hypercube sampling over box domains
+    - hard-constraint ansatz for boundary / terminal conditions
+    - CSV export for loss history, predictions, and timing
+    - 9 passing unit test binaries
+
+  1D heat equation:
+    u_t = α u_xx,  u(0,x) = sin(πx),  u(t,0) = u(t,1) = 0
+    analytical: u(t,x) = exp(-α π² t) sin(πx)
+
+    results:
+      PINN  max err 3.84e-04  |  mean err 6.64e-05
+      FDM   max err 2.41e-04  |  mean err 8.64e-05
+    training ~1 s on CPU. inference 1 ms for 10,000 points.
+
+  1D Black-Scholes:
+    V_t + ½σ²S²V_SS + rSV_S - rV = 0
+    hard-constraint ansatz enforces terminal payoff and both boundaries
+    exactly. payoff smoothed via softplus to handle the kink at S=K.
+
+    results:
+      PINN  max err 2.77  |  mean err 1.43e-01
+      FDM   max err 1.31e-01  |  mean err 2.15e-03
+    error concentrated near the strike (S≈K). active area of improvement.
+    todo: L-BFGS refinement, adaptive collocation near strike.
+
+[2] classical harmonic motion  (Classical-Harmonic-Motion/)
+  solves the damped oscillator over long horizons (10–60 seconds):
+    y'' + γy' + (g/l)y = 0,  y(0)=y₀,  y'(0)=dy₀
+
+  approach: time-sliced PINN. trajectory split into overlapping windows.
+  each slice uses a hard-constraint ansatz for exact initial conditions,
+  preventing error accumulation across handoffs.
+  training: adam warm-up followed by L-BFGS refinement.
+
+  results (60s horizon):
+    PINN  max err 3.07e-04  |  mean err 1.32e-05  |  435 s training
+    FDM   max err 2.49e-02  |  mean err 1.23e-03  |  0.37 ms
+  80× more accurate than FDM at the same computational budget.
+
+[3] quantum harmonic oscillator  (Quantum-Harmonic-Oscillator/)
+  solves the stationary 1D QHO:
+    -½ψ''(x) + ½x²ψ(x) = Eψ(x)
+  bc hard-enforced via ansatz ψ(x) = (1-(x/L)²)·net(x).
+  normalization loss prevents the trivial zero solution.
+  trains eigenstates n = 0, 1, 2, 3, 7 independently.
+
+  results:
+    n=0  E=0.500  wavefunction max err ~1e-04  density max err ~1e-06
+    n=1  E=1.500  wavefunction max err ~1e-04  density max err ~1e-06
+    n=2  E=2.500  wavefunction max err 3.16e-04  normalization 1.000302
+    n=3  E=3.500  wavefunction max err ~1e-04  density max err ~1e-06
+
+[4] wright-fisher PINN  (experiments/wright-fisher/)
+  the main research project.
+  prediction market prices are modeled as a wright-fisher diffusion:
+    dp = θp(1-p)dt + √(c·p(1-p)/(T-t+δ)) dW
+
+  goal: an inverse PINN that recovers latent deficiency parameters from
+  observed price paths — detecting clock lag (δ), martingale drift (θ),
+  boundary distortion (α), or microstructure noise.
+
+  classical inverse solver (done):
+    euler-gaussian quasi-likelihood solver validated on four synthetic
+    deficiency types. correctly identifies which deficiency is present
+    and recovers parameter values (δ=0.15 clock lag, θ=3 drift, α=2
+    boundary distortion all cleanly separated).
+
+  forward PINN — PINN-0 (done):
+    learns fokker-planck density ρ(p,t) from simulated path snapshots.
+    losses: particle negative log-likelihood + softplus normalization.
+    collocation: sinkhorn/wasserstein adaptive sampling.
+    training: adam + L-BFGS two-stage.
+    result: mean density IAE ≈ 0.084 across six snapshot times.
+
+  inverse PINN — PINN-1 (in progress):
+    jointly learns ρ(p,t) and recovers δ from data.
+    current status: forward density working (IAE ≈ 0.088), but δ
+    saturates at its upper bound.
+    next: staged training — freeze δ during forward pretraining,
+    release only after density network converges.
+
+---
+
+status summary:
+  heat 1D (C)              done       max err 3.84e-04, ~1 s training
+  black-scholes 1D (C)     in prog    mean err 1.43e-01, kink unsolved
+  SHM time-slice           done       max err 3.07e-04 over 60 s
+  QHO eigenstates n=0–7    done       normalization 1.000000
+  WF classical solver      done       all 4 deficiency types identified
+  WF forward PINN          done       mean density IAE 0.084
+  WF inverse PINN          in prog    density fit working; δ recovery failing
+  CUDA backend             not started  infrastructure scaffolded
 
 repo: github.com/SaaketK/PINN
 double-click \`github\` to open it.`
@@ -484,6 +584,7 @@ function getNode(pathArr) {
 }
 function listDir(node) {
   if (!node || node.type !== "dir") return [];
+  if (node.order) return node.order.filter(k => k in node.children || (k + "/") in node.children);
   return Object.keys(node.children).sort();
 }
 function pathToString(pathArr) {
@@ -602,6 +703,31 @@ function ToolsAppGlyph({ size = 48 }) {
       {/* hammer */}
       <rect x="34" y="10" width="8" height="6" fill="#888" />
       <rect x="36" y="16" width="4" height="16" fill="#6b4a30" />
+    </svg>
+  );
+}
+
+function GDGlyph({ size = 48 }) {
+  const s = size;
+  return (
+    <svg width={s} height={s} viewBox="0 0 48 48" shapeRendering="crispEdges">
+      {/* outer dark ring */}
+      <rect x="6" y="6" width="36" height="36" rx="4" fill="#7a3e00" />
+      {/* orange bg */}
+      <rect x="8" y="8" width="32" height="32" rx="3" fill="#e87000" />
+      {/* highlight top */}
+      <rect x="10" y="10" width="28" height="4" fill="#ffa030" opacity="0.7" />
+      {/* yellow star / spiky shape */}
+      <polygon points="24,6 27,18 36,14 28,22 38,26 28,28 32,40 24,33 16,40 20,28 10,26 20,22 12,14 21,18" fill="#ffe000" />
+      {/* inner orange circle */}
+      <rect x="18" y="18" width="12" height="12" rx="2" fill="#e87000" />
+      {/* face: eyes */}
+      <rect x="20" y="21" width="2" height="3" fill="#1a0a00" />
+      <rect x="26" y="21" width="2" height="3" fill="#1a0a00" />
+      {/* face: smile */}
+      <rect x="20" y="25" width="8" height="1" fill="#1a0a00" />
+      <rect x="20" y="26" width="2" height="1" fill="#1a0a00" />
+      <rect x="26" y="26" width="2" height="1" fill="#1a0a00" />
     </svg>
   );
 }
@@ -887,6 +1013,10 @@ function Desktop({ onClose, initialFolder = null }) {
           return <BooksApp key={a.id} offsetIndex={i} zIndex={z}
             onFocus={() => focusWindow(key)} onClose={() => closeApp(a.id)} />;
         }
+        if (a.app === "gd") {
+          return <GDApp key={a.id} offsetIndex={i} zIndex={z}
+            onFocus={() => focusWindow(key)} onClose={() => closeApp(a.id)} />;
+        }
         return null;
       })}
 
@@ -951,7 +1081,12 @@ function FileWindow({ path, onClose, onOpenFile, onOpenDir, zIndex = 200, onFocu
           const child = !isDir ? getNode([...path.map(s => s.replace(/\/$/, "")), name]) : null;
           const isLink = child && child.type === "link";
           const isApp = child && child.type === "app";
-          const appGlyph = isApp ? (child.app === "tools" ? <ToolsAppGlyph size={44} /> : <BooksAppGlyph size={44} />) : null;
+          const appGlyph = isApp
+            ? (child.app === "tools" ? <ToolsAppGlyph size={44} />
+              : child.app === "books" ? <BooksAppGlyph size={44} />
+              : child.app === "gd" ? <GDGlyph size={44} />
+              : null)
+            : null;
           return (
             <div
               key={name}
@@ -1425,6 +1560,284 @@ function ClipboardTool() {
       </div>
       <div className="tool-status">{statusMsg}</div>
     </section>
+  );
+}
+
+// ============================================================
+// GDApp / GDGame — mini Geometry Dash (Jumping Cube): Level 1 "Stereo Madness"
+// ============================================================
+
+// Hand-authored layout for Stereo Madness (level 1). World-x in pixels.
+// type: "spike" (ground hazard) | "block" (h-tall, jump over OR land on top).
+const SM_LEVEL = [
+  { x: 640,  t: "spike" },
+  { x: 1000, t: "spike" },
+  { x: 1360, t: "spike" },
+  { x: 1402, t: "spike" },                 // double
+  { x: 1840, t: "block", h: 40 },
+  { x: 2220, t: "spike" },
+  { x: 2580, t: "block", h: 40 },
+  { x: 2608, t: "block", h: 40 },          // wide platform
+  { x: 3020, t: "spike" },
+  { x: 3380, t: "spike" },
+  { x: 3422, t: "spike" },
+  { x: 3464, t: "spike" },                 // triple
+  { x: 3920, t: "block", h: 40 },
+  { x: 4300, t: "spike" },
+  { x: 4660, t: "spike" },
+  { x: 4702, t: "spike" },                 // double
+  { x: 5120, t: "block", h: 40 },
+  { x: 5148, t: "block", h: 40 },          // wide platform
+  { x: 5560, t: "spike" },
+  { x: 5920, t: "spike" },
+  { x: 5962, t: "spike" },
+  { x: 6004, t: "spike" },                 // triple finish
+];
+const SM_END = 6700;          // world-x at which the level is cleared
+const BW = 28;                // block width (px)
+
+// Stereo-Madness-flavored chiptune: 32-step loop at 16th-note resolution.
+// Values are MIDI note numbers (0 = rest). i-VI-III-VII feel in A minor.
+const SM_LEAD = [
+  69,0,76,0, 72,0,76,0, 69,0,74,0, 72,0,67,0,
+  69,0,77,0, 72,0,77,0, 71,0,74,0, 72,0,79,0,
+];
+const SM_BASS = [
+  45,0,0,0, 45,0,0,45, 41,0,0,0, 41,0,0,41,
+  48,0,0,0, 48,0,0,48, 43,0,0,0, 43,0,0,43,
+];
+
+function GDApp(props) {
+  return (
+    <AppWindow title="Jumping Cube — Level 1" icon={<GDGlyph size={20} />} {...props}
+      initialSize={{ width: 600, height: 368 }}>
+      <GDGame />
+    </AppWindow>
+  );
+}
+
+function GDGame() {
+  const canvasRef = React.useRef(null);
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    const W = canvas.width, H = canvas.height;
+    const GROUND_Y = H - 52;
+    const CUBE = 36;
+    const GRAVITY = 0.56;
+    const JUMP_V = -11.5;
+    const SPEED = 5;          // constant scroll speed for deterministic level timing
+    const PX = 80;            // player's fixed screen-x
+
+    // ── audio: Web Audio chiptune synth ───────────────────────
+    let audioCtx = null, master = null, schedId = null, step = 0, nextNote = 0;
+    const STEP_DUR = 60 / 150 / 4;   // 16th note @ 150 BPM
+    const mfreq = (n) => 440 * Math.pow(2, (n - 69) / 12);
+    const tone = (n, t, type, dur, g) => {
+      const o = audioCtx.createOscillator(), gn = audioCtx.createGain();
+      o.type = type; o.frequency.setValueAtTime(mfreq(n), t);
+      gn.gain.setValueAtTime(0, t);
+      gn.gain.linearRampToValueAtTime(g, t + 0.006);
+      gn.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(gn); gn.connect(master); o.start(t); o.stop(t + dur + 0.02);
+    };
+    const kick = (t) => {
+      const o = audioCtx.createOscillator(), gn = audioCtx.createGain();
+      o.frequency.setValueAtTime(150, t); o.frequency.exponentialRampToValueAtTime(45, t + 0.12);
+      gn.gain.setValueAtTime(0.5, t); gn.gain.exponentialRampToValueAtTime(0.001, t + 0.16);
+      o.connect(gn); gn.connect(master); o.start(t); o.stop(t + 0.18);
+    };
+    const scheduler = () => {
+      while (nextNote < audioCtx.currentTime + 0.12) {
+        const s = step % 32;
+        if (SM_LEAD[s]) tone(SM_LEAD[s], nextNote, "square", 0.16, 0.06);
+        if (SM_BASS[s]) tone(SM_BASS[s], nextNote, "sawtooth", 0.20, 0.09);
+        if (s % 4 === 0) kick(nextNote);
+        nextNote += STEP_DUR; step++;
+      }
+    };
+    const startMusic = () => {
+      if (!audioCtx) {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AC();
+        master = audioCtx.createGain(); master.gain.value = 0.22; master.connect(audioCtx.destination);
+      }
+      audioCtx.resume();
+      step = 0; nextNote = audioCtx.currentTime + 0.06;
+      if (schedId) clearInterval(schedId);
+      schedId = setInterval(scheduler, 25);
+    };
+    const stopMusic = () => { if (schedId) { clearInterval(schedId); schedId = null; } };
+
+    // ── game state ────────────────────────────────────────────
+    const mkState = () => ({
+      phase: "start",                       // start | play | dead | win
+      worldX: 0,
+      bgX: 0, tileX: 0,
+      p: { y: GROUND_Y - CUBE, vy: 0, grounded: true, rot: 0 },
+    });
+    let S = mkState();
+
+    const tryJump = () => {
+      if (S.phase === "dead" || S.phase === "win") { S = mkState(); S.phase = "play"; startMusic(); return; }
+      if (S.phase === "start") { S.phase = "play"; startMusic(); }
+      if (S.p.grounded) { S.p.vy = JUMP_V; S.p.grounded = false; }
+    };
+    const onKey = (e) => {
+      if (e.code === "Space" || e.code === "ArrowUp") { e.preventDefault(); tryJump(); }
+    };
+    window.addEventListener("keydown", onKey);
+    canvas.addEventListener("click", tryJump);
+
+    // obstacle screen-x helper
+    const sx = (o) => o.x - S.worldX;
+
+    let raf;
+    const loop = () => {
+      // ── update ──
+      if (S.phase === "play") {
+        S.worldX += SPEED;
+        S.bgX = (S.bgX - SPEED * 0.15 + 80) % 80;
+        S.tileX = (S.tileX - SPEED + W + 40) % 40;
+
+        const prevBottom = S.p.y + CUBE;
+        S.p.vy += GRAVITY;
+        S.p.y += S.p.vy;
+        S.p.grounded = false;
+
+        // ground
+        if (S.p.y >= GROUND_Y - CUBE) {
+          S.p.y = GROUND_Y - CUBE; S.p.vy = 0; S.p.grounded = true;
+        }
+
+        // player collision box (with a little forgiveness)
+        const px = PX + 5, pw = CUBE - 10;
+        for (const o of SM_LEVEL) {
+          const ox = sx(o);
+          if (ox > W + 40 || ox < -60) continue;
+          if (o.t === "spike") {
+            const hx = ox + 8, hy = GROUND_Y - 34, hw = 22, hh = 34;
+            if (px < hx + hw && px + pw > hx && S.p.y + 5 < hy + hh && S.p.y + CUBE - 5 > hy)
+              S.phase = "dead";
+          } else {
+            const top = GROUND_Y - o.h;
+            const horiz = px < ox + BW && px + pw > ox;
+            if (!horiz) continue;
+            if (S.p.vy >= 0 && prevBottom <= top + 2 && S.p.y + CUBE >= top) {
+              // land on top of block
+              S.p.y = top - CUBE; S.p.vy = 0; S.p.grounded = true;
+            } else if (S.p.y + 5 < top + o.h && S.p.y + CUBE - 5 > top) {
+              // ran into the side -> crash
+              S.phase = "dead";
+            }
+          }
+        }
+
+        // rotation: spin while airborne, snap on landing
+        if (S.p.grounded) S.p.rot = Math.round(S.p.rot / 90) * 90;
+        else S.p.rot += 6;
+
+        if (S.phase === "dead") stopMusic();
+        if (S.worldX > SM_END) { S.phase = "win"; stopMusic(); }
+      }
+
+      // ── draw ──
+      ctx.fillStyle = "#16213e"; ctx.fillRect(0, 0, W, H);
+
+      ctx.strokeStyle = "#1a2a52"; ctx.lineWidth = 1;
+      for (let x = S.bgX; x < W; x += 80) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+      for (let y = 0; y < H; y += 80) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+
+      ctx.fillStyle = "#0f3460"; ctx.fillRect(0, GROUND_Y, W, H - GROUND_Y);
+      ctx.fillStyle = "#e94560"; ctx.fillRect(0, GROUND_Y, W, 3);
+      ctx.strokeStyle = "#1a4a7a"; ctx.lineWidth = 1;
+      for (let x = S.tileX; x < W; x += 40) { ctx.beginPath(); ctx.moveTo(x, GROUND_Y + 3); ctx.lineTo(x, H); ctx.stroke(); }
+
+      for (const o of SM_LEVEL) {
+        const ox = sx(o);
+        if (ox < -60 || ox > W + 40) continue;
+        if (o.t === "spike") {
+          ctx.fillStyle = "#e94560";
+          ctx.beginPath(); ctx.moveTo(ox,GROUND_Y); ctx.lineTo(ox+19,GROUND_Y-40); ctx.lineTo(ox+38,GROUND_Y); ctx.closePath(); ctx.fill();
+          ctx.fillStyle = "#ff6b81";
+          ctx.beginPath(); ctx.moveTo(ox+9,GROUND_Y-5); ctx.lineTo(ox+19,GROUND_Y-34); ctx.lineTo(ox+29,GROUND_Y-5); ctx.closePath(); ctx.fill();
+        } else {
+          ctx.fillStyle = "#533483"; ctx.fillRect(ox, GROUND_Y - o.h, BW, o.h);
+          ctx.fillStyle = "#7b5ea7"; ctx.fillRect(ox, GROUND_Y - o.h, BW, 5);
+          ctx.fillStyle = "#6a42a8"; ctx.fillRect(ox, GROUND_Y - o.h, 4, o.h);
+        }
+      }
+
+      const cx = PX + CUBE/2, cy = S.p.y + CUBE/2;
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(S.p.rot * Math.PI / 180);
+      ctx.fillStyle = "#ffd700"; ctx.fillRect(-CUBE/2, -CUBE/2, CUBE, CUBE);
+      ctx.fillStyle = "#cc9900"; ctx.fillRect(-CUBE/2+8, -CUBE/2+8, CUBE-16, CUBE-16);
+      ctx.strokeStyle = "#1a1a2e"; ctx.lineWidth = 2; ctx.strokeRect(-CUBE/2, -CUBE/2, CUBE, CUBE);
+      ctx.strokeStyle = "#ffe566"; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(-CUBE/2+4, -CUBE/2+4); ctx.lineTo(CUBE/2-4, CUBE/2-4); ctx.stroke();
+      ctx.restore();
+
+      // progress bar (level completion)
+      const pct = Math.max(0, Math.min(1, S.worldX / SM_END));
+      ctx.fillStyle = "#0b1430"; ctx.fillRect(W/2 - 110, 12, 220, 12);
+      ctx.fillStyle = "#5cf08a"; ctx.fillRect(W/2 - 110, 12, 220 * pct, 12);
+      ctx.strokeStyle = "#cdd6e0"; ctx.lineWidth = 1; ctx.strokeRect(W/2 - 110, 12, 220, 12);
+      ctx.fillStyle = "#ffffff"; ctx.font = "13px 'VT323', monospace"; ctx.textAlign = "center";
+      ctx.fillText(`${Math.floor(pct * 100)}%`, W/2, 33);
+      ctx.textAlign = "left";
+
+      if (S.phase === "start") {
+        ctx.fillStyle = "rgba(0,0,0,0.55)"; ctx.fillRect(0, 0, W, H);
+        ctx.fillStyle = "#ffd700"; ctx.font = "30px 'VT323', monospace"; ctx.textAlign = "center";
+        ctx.fillText("Gyro Challenge", W/2, H/2 - 26);
+        ctx.fillStyle = "#9fd6ff"; ctx.font = "16px 'VT323', monospace";
+        ctx.fillText("Level 1", W/2, H/2 - 2);
+        ctx.fillStyle = "#cccccc"; ctx.font = "18px 'VT323', monospace";
+        ctx.fillText("click or SPACE to play", W/2, H/2 + 26);
+        ctx.textAlign = "left";
+      }
+
+      if (S.phase === "dead") {
+        ctx.fillStyle = "rgba(0,0,0,0.65)"; ctx.fillRect(0, 0, W, H);
+        ctx.fillStyle = "#e94560"; ctx.font = "34px 'VT323', monospace"; ctx.textAlign = "center";
+        ctx.fillText("CRASHED", W/2, H/2 - 22);
+        ctx.fillStyle = "#ffd700"; ctx.font = "20px 'VT323', monospace";
+        ctx.fillText(`${Math.floor(pct * 100)}%`, W/2, H/2 + 8);
+        ctx.fillStyle = "#cccccc"; ctx.font = "16px 'VT323', monospace";
+        ctx.fillText("click or SPACE to retry", W/2, H/2 + 34);
+        ctx.textAlign = "left";
+      }
+
+      if (S.phase === "win") {
+        ctx.fillStyle = "rgba(0,0,0,0.7)"; ctx.fillRect(0, 0, W, H);
+        ctx.fillStyle = "#5cf08a"; ctx.font = "30px 'VT323', monospace"; ctx.textAlign = "center";
+        ctx.fillText("LEVEL COMPLETE!", W/2, H/2 - 18);
+        ctx.fillStyle = "#ffd700"; ctx.font = "18px 'VT323', monospace";
+        ctx.fillText("Stereo Madness — 100%", W/2, H/2 + 10);
+        ctx.fillStyle = "#cccccc"; ctx.font = "16px 'VT323', monospace";
+        ctx.fillText("click or SPACE to replay", W/2, H/2 + 36);
+        ctx.textAlign = "left";
+      }
+
+      raf = requestAnimationFrame(loop);
+    };
+
+    raf = requestAnimationFrame(loop);
+    return () => {
+      cancelAnimationFrame(raf);
+      stopMusic();
+      if (audioCtx) audioCtx.close();
+      window.removeEventListener("keydown", onKey);
+      canvas.removeEventListener("click", tryJump);
+    };
+  }, []);
+
+  return (
+    <canvas ref={canvasRef} width={560} height={280}
+      style={{ display: "block", width: "100%", cursor: "pointer", imageRendering: "pixelated" }} />
   );
 }
 
