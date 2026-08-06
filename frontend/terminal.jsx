@@ -88,7 +88,7 @@ Spring 2026.
 stack:
   C++
   Python
-  PyBind11
+  ctypes
   FastAPI
   SQLite
   Docker
@@ -112,7 +112,7 @@ systems work:
   parallelized graph search with OpenMP
   reached up to 33x query speedup over brute-force FAISS
   measured 96.0% Recall@10 on SIFT1M
-  exposed the C++ index to Python via PyBind11
+  exposed the C++ index to Python via ctypes
   containerized the full stack with Docker
 
 repo: github.com/SaaketK/SaaketK.github.io/tree/main/backend/recommender

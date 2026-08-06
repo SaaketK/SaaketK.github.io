@@ -40,10 +40,23 @@ function Chair() {
   );
 }
 
-function Worker({ visible }) {
+function Worker({ visible, onClick }) {
   if (!visible) return null;
   return (
-    <g transform="translate(-19 -106)">
+    <g
+      className={onClick ? "room-worker room-worker--interactive" : "room-worker"}
+      transform="translate(-19 -106)"
+      onClick={onClick}
+      onKeyDown={(event) => {
+        if (onClick && (event.key === "Enter" || event.key === " ")) {
+          event.preventDefault();
+          onClick();
+        }
+      }}
+      role={onClick ? "button" : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      aria-label={onClick ? "Enter Saaket's mind" : undefined}
+    >
       <rect x="1406" y="528" width="96" height="120" fill="#2f4d6e" />
       <rect x="1406" y="528" width="96" height="8" fill="#1f3a55" />
       <rect x="1406" y="640" width="96" height="8" fill="#1f3a55" />
@@ -452,7 +465,7 @@ function DeskLamp({ on, onClick }) {
 }
 
 // ---------- ROOM ----------
-function Room({ scene, time, lampOn, monitorOn, snoozed, onPhoneClick, onMonitorClick, onLampClick }) {
+function Room({ scene, time, lampOn, monitorOn, snoozed, onPhoneClick, onMonitorClick, onLampClick, onWorkerClick }) {
   const isNight = scene === "night";
   const isAlarm = scene === "alarm";
   const isWork = scene === "work";
@@ -680,7 +693,6 @@ function Room({ scene, time, lampOn, monitorOn, snoozed, onPhoneClick, onMonitor
           <rect x="1320" y="252" width="296" height="8" fill="#2c2c2c" />
           <rect x="1320" y="394" width="296" height="4" fill="#1a1a1a" />
           <rect x="1328" y="260" width="280" height="130" fill="#1a1b1e" />
-          <MiniDesktop time={time} />
           <rect x="1602" y="392" width="4" height="4" fill="#ffffff" />
         </g>
         <rect x="1325" y="437" width="170" height="10" fill="#1a1a1a" />
@@ -761,24 +773,22 @@ function Room({ scene, time, lampOn, monitorOn, snoozed, onPhoneClick, onMonitor
         </g>
       )}
 
-      {/* Redraw monitor screen after darkness pass */}
-      {(() => {
-        const tHr = time.getHours() + time.getMinutes()/60 + time.getSeconds()/3600;
-        const night = nightAmount(tHr);
-        return (
-          <g pointerEvents="none" transform="translate(-8 0)">
-            <rect x="1322" y="254" width="292" height="142" fill="#75d8f0"
-              opacity={0.04 + night * 0.1}
-              style={{ mixBlendMode: "screen", filter: "drop-shadow(0 0 10px #7ee8ff) drop-shadow(0 0 20px #5bbfff)" }} />
-            {night > 0.05 && (
-              <g opacity={0.35 + night * 0.39}>
-                <rect x="1328" y="260" width="280" height="130" fill="#1a1b1e" />
-                <MiniDesktop time={time} />
-              </g>
-            )}
-          </g>
-        );
-      })()}
+      {/* Keep the complete monitor UI in one layer so it stays rigid while zooming. */}
+      <g className="monitor-screen-layer" pointerEvents="none" transform="translate(-8 0)">
+        <rect
+          x="1322"
+          y="254"
+          width="292"
+          height="142"
+          fill="#75d8f0"
+          opacity={0.04 + roomNight * 0.1}
+          style={{
+            mixBlendMode: "screen",
+            filter: "drop-shadow(0 0 10px #7ee8ff) drop-shadow(0 0 20px #5bbfff)",
+          }}
+        />
+        <MiniDesktop time={time} />
+      </g>
 
       {monitorOn && (
         <g style={{ mixBlendMode: "screen", pointerEvents: "none" }}>
@@ -795,7 +805,7 @@ function Room({ scene, time, lampOn, monitorOn, snoozed, onPhoneClick, onMonitor
       {/* Chair + Worker */}
       {isWork ? (
         <>
-          <Worker visible={true} />
+          <Worker visible={true} onClick={onWorkerClick} />
           <Chair />
         </>
       ) : (
@@ -829,7 +839,7 @@ function MiniDesktop({ time }) {
     { y: 3, label: "books" },
   ];
   return (
-    <g>
+    <g className="mini-desktop">
       <rect x={SX} y={SY} width={SW} height={SH} fill="#2d6e8a" />
       <rect x={SX} y={SY} width={SW} height={9} fill="#d4d0c8" />
       <rect x={SX} y={SY + 8} width={SW} height={1} fill="#5a564f" />

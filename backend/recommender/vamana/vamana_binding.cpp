@@ -6,7 +6,7 @@
 
 extern "C" {
     // Create a new index
-    void*  vamana_create(int R, int L, float alpha, bool use_cosine){
+    void* vamana_create(int R, int L, float alpha, bool use_cosine){
         VamanaIndex::Config cfg;
         cfg.R = R;
         cfg.L = L;
