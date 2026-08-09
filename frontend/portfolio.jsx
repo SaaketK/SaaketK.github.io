@@ -68,7 +68,7 @@ function PortfolioPage() {
             </article>
             <article>
               <div><strong>Computer Science · NJIT</strong><time>Education</time></div>
-              <p>Albert Dorman Honors College.<br />Minors in Computer Engineering and Computational Mathematics.</p>
+              <p>Albert Dorman Honors College<br />Minors in Computer Engineering and Computational Mathematics.</p>
             </article>
           </section>
 
